@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cognitive Twin</title>
+<style>
+  :root { --bg:#0F1424; --panel:#171E33; --line:#2A3350; --text:#F4F2ED; --muted:#A9B0C2;
+          --teal:#46D3C6; --amber:#F2A33A; --bad:#E86A5C; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 Inter, system-ui, sans-serif; }
+  header { padding:20px 28px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:16px; }
+  header h1 { margin:0; font-size:22px; } header span { color:var(--muted); }
+  main { display:grid; grid-template-columns: 340px 1fr 1fr; gap:16px; padding:16px 28px 40px; }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
+  section { background:var(--panel); border-radius:14px; padding:18px; }
+  h2 { font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--teal); margin:0 0 12px; }
+  label { display:block; margin:8px 0 4px; color:var(--muted); font-size:13px; }
+  input, select { width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:#0F1424; color:var(--text); }
+  .check { display:flex; gap:8px; align-items:center; margin:8px 0; color:var(--text); }
+  .check input { width:auto; }
+  button { background:var(--teal); color:#0F1424; border:0; border-radius:8px; padding:9px 14px; font-weight:600; cursor:pointer; margin:4px 4px 4px 0; }
+  button.ghost { background:transparent; color:var(--teal); border:1px solid var(--teal); }
+  button:disabled { opacity:.4; cursor:default; }
+  .bar { height:10px; background:#0F1424; border-radius:6px; overflow:hidden; }
+  .bar > div { height:100%; background:var(--teal); }
+  .skill { margin:10px 0; } .skill .row { display:flex; justify-content:space-between; font-size:13px; }
+  .muted { color:var(--muted); font-size:13px; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; background:#1F2A45; margin:2px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  td, th { text-align:left; padding:6px 4px; border-bottom:1px solid var(--line); }
+  .ok { color:var(--teal); } .no { color:var(--bad); } .warn { color:var(--amber); }
+  .item { background:#0F1424; border-radius:10px; padding:14px; margin:10px 0; }
+  .opts button { display:block; width:100%; text-align:left; background:#1F2A45; color:var(--text); }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
+  .stat { background:#0F1424; border-radius:10px; padding:10px; } .stat b { font-size:20px; display:block; }
+  pre { white-space:pre-wrap; word-break:break-all; font-size:11px; color:var(--muted); max-height:200px; overflow:auto; }
+</style>
+</head>
+<body>
+<header><h1>Cognitive Twin</h1><span>Multi-agent reinforcement learning for personalised education</span></header>
+<main>
+  <div>
+    <section>
+      <h2>Enrol a learner</h2>
+      <label>Name</label><input id="name" value="Asha">
+      <label>Age</label><input id="age" type="number" value="22">
+      <label>Region</label>
+      <select id="region"><option>IN</option><option>US</option><option>EU</option><option>UK</option></select>
+      <div class="check"><input id="optin" type="checkbox" checked><span>Opt in to neural sensing</span></div>
+      <div class="check"><input id="guardian" type="checkbox"><span>Guardian consent (under 18)</span></div>
+      <label>Mode</label>
+      <select id="mode"><option value="sim">Simulated learner (demo)</option><option value="human">I'll answer myself</option></select>
+      <button onclick="enrol()">Enrol</button>
+      <p id="consent" class="muted"></p>
+    </section>
+    <section style="margin-top:16px">
+      <h2>Validator DAO</h2>
+      <div id="dao" class="muted">Loading…</div>
+    </section>
+  </div>
+
+  <section>
+    <h2>Cognitive twin</h2>
+    <div id="who" class="muted">Enrol a learner to begin.</div>
+    <div class="stats">
+      <div class="stat"><span class="muted">Attention</span><b id="att">–</b></div>
+      <div class="stat"><span class="muted">Load</span><b id="load">–</b></div>
+      <div class="stat"><span class="muted">Fatigue est.</span><b id="fat">–</b></div>
+    </div>
+    <div id="skills"></div>
+    <h2 style="margin-top:18px">Credentials</h2>
+    <div id="creds" class="muted">None yet.</div>
+  </section>
+
+  <section>
+    <h2>Agents at work</h2>
+    <div>
+      <button id="btnNext" onclick="next()" disabled>Next step</button>
+      <button id="btnAuto" class="ghost" onclick="autoplay(20)" disabled>Autoplay 20</button>
+    </div>
+    <div id="item"></div>
+    <table><thead><tr><th>Step</th><th>Curriculum</th><th>Tutor</th><th>Result</th></tr></thead>
+      <tbody id="log"></tbody></table>
+    <h2 style="margin-top:18px">Guardian interventions</h2>
+    <div id="guard" class="muted">None.</div>
+  </section>
+</main>
+<script>
+let sid = null, state = null, pending = null;
+const $ = id => document.getElementById(id);
+const api = async (path, body) => {
+  const r = await fetch(path, body === undefined ? {} : {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.detail || r.statusText);
+  return j;
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function enrol() {
+  try {
+    state = await api('/api/learners', {name: $('name').value, age: +$('age').value, region: $('region').value,
+      neural_opt_in: $('optin').checked, guardian_consent: $('guardian').checked, simulated: $('mode').value === 'sim'});
+    sid = state.id; render();
+    $('btnNext').disabled = false; $('btnAuto').disabled = !state.simulated;
+  } catch (e) { $('consent').innerHTML = `<span class="no">${esc(e.message)}</span>`; }
+}
+
+async function refresh() { state = await api(`/api/learners/${sid}`); render(); }
+
+async function next() {
+  if (state.simulated) { await autoplay(1); return; }
+  const d = await api(`/api/learners/${sid}/next`, {});
+  if (d.action === 'break') {
+    $('item').innerHTML = `<div class="item"><b class="warn">Pacing agent: take a short break.</b>
+      <p class="muted">Proposed: ${esc(d.proposed_action)}</p><button onclick="doBreak()">Done resting</button></div>`;
+    return;
+  }
+  pending = d;
+  $('item').innerHTML = `<div class="item"><div class="muted">${esc(d.item.skill_name)} · difficulty ${d.difficulty} · ${esc(d.modality.replace('_',' '))}</div>
+    <p><b>${esc(d.item.prompt)}</b></p><div class="opts">${d.item.options.map((o,i)=>`<button onclick="answer(${i})">${esc(o)}</button>`).join('')}</div></div>`;
+}
+
+async function answer(i) {
+  const r = await api(`/api/learners/${sid}/answer`, {item_id: pending.item.id, choice: i});
+  $('item').innerHTML = `<div class="item"><b class="${r.correct?'ok':'no'}">${r.correct?'Correct':'Not quite'}</b>
+    <p class="muted">${esc(r.hint)} Belief now ${r.belief}.</p></div>`;
+  await refresh();
+}
+
+async function doBreak() { await api(`/api/learners/${sid}/break`, {}); $('item').innerHTML=''; await refresh(); }
+
+async function autoplay(n) {
+  state = await api(`/api/learners/${sid}/autoplay`, {steps: n});
+  $('item').innerHTML = ''; render();
+}
+
+async function credential(skill) {
+  const r = await api(`/api/learners/${sid}/credentials`, {skill});
+  alertBox(r.issued ? `Credential issued for ${skill}: quorum reached.` : `Refused: ${r.reason}`);
+  await refresh(); dao();
+}
+
+async function verify(id) {
+  const r = await api(`/api/credentials/${id}/verify`);
+  alertBox(`Verification: ${r.verification.valid ? 'VALID' : 'INVALID'} · signed stake ${r.verification.signed_stake} · chain intact ${r.verification.chain_intact}`);
+}
+
+function alertBox(msg) { $('item').innerHTML = `<div class="item">${esc(msg)}</div>`; }
+
+function render() {
+  const c = state.consent;
+  $('consent').innerHTML = `Sensing: <b class="${state.sensing_active?'ok':'warn'}">${state.sensing_active?'active':'off'}</b>` +
+    (c.reasons.length ? `<br>${c.reasons.map(esc).join('<br>')}` : '');
+  const t = state.twin;
+  $('who').innerHTML = `${esc(state.name)} · ${esc(state.id)} · step ${t.step} · ${state.simulated?'simulated':'human'} learner`;
+  $('att').textContent = t.attention.toFixed(2); $('load').textContent = t.load.toFixed(2); $('fat').textContent = t.fatigue_estimate.toFixed(2);
+  $('skills').innerHTML = state.skills.map(s => {
+    const p = t.p_known[s.id], m = t.mastered.includes(s.id), f = t.frontier.includes(s.id);
+    return `<div class="skill"><div class="row"><span>${esc(s.name)} ${m?'<span class="pill ok">mastered</span>':f?'<span class="pill">frontier</span>':''}</span><span>${p.toFixed(2)}</span></div>
+      <div class="bar"><div style="width:${p*100}%;background:${m?'var(--teal)':f?'var(--amber)':'#56607a'}"></div></div>
+      ${m && !state.credentials.some(x=>x.credentialSubject.skill===s.id) ? `<button class="ghost" onclick="credential('${s.id}')">Request credential</button>`:''}</div>`;
+  }).join('');
+  $('creds').innerHTML = state.credentials.length ? state.credentials.map(x =>
+    `<div class="item"><b>${esc(x.credentialSubject.name)}</b><div class="muted">${esc(x.id)} · block ${x.ledgerAnchor.block} · ${x.proof.length} validator signatures</div>
+     <button class="ghost" onclick="verify('${x.id}')">Verify</button></div>`).join('') : 'None yet.';
+  $('log').innerHTML = state.log.slice().reverse().map(e => e.action === 'break'
+    ? `<tr><td>${e.step}</td><td colspan="2" class="warn">Pacing: break</td><td></td></tr>`
+    : `<tr><td>${e.step}</td><td>${esc(e.skill)}</td><td>d${e.difficulty} · ${esc((e.modality||'').replace('_',' '))}</td>
+       <td class="${e.correct?'ok':'no'}">${e.correct?'✓':'✗'} ${e.belief_delta>0?'+':''}${e.belief_delta}</td></tr>`).join('');
+  $('guard').innerHTML = state.interventions.length ? state.interventions.slice().reverse().map(i =>
+    `<div><span class="pill">${esc(i.agent)}</span> step ${i.step}: ${esc(i.detail)}</div>`).join('') : 'None.';
+}
+
+async function dao() {
+  const l = await api('/api/ledger');
+  $('dao').innerHTML = l.validators.map(v => `<div>${esc(v.name)} <span class="pill">stake ${v.stake}</span></div>`).join('') +
+    `<p>Chain intact: <b class="${l.chain_intact?'ok':'no'}">${l.chain_intact}</b> · ${l.blocks.length} blocks</p>`;
+}
+dao();
+</script>
+</body>
+</html>
