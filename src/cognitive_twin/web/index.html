@@ -3,181 +3,570 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cognitive Twin</title>
+<meta name="color-scheme" content="light dark">
+<title>Cognitive Twin · Your adaptive tutor team</title>
 <style>
-  :root { --bg:#0F1424; --panel:#171E33; --line:#2A3350; --text:#F4F2ED; --muted:#A9B0C2;
-          --teal:#46D3C6; --amber:#F2A33A; --bad:#E86A5C; }
+  :root {
+    --bg:#F6F5F1; --card:#FFFFFF; --ink:#1B1F2A; --muted:#5B6170; --line:#E3E0D8;
+    --brand:#0E7C74; --brand-ink:#FFFFFF; --brand-soft:#E3F4F2;
+    --good:#1F7A3A; --good-soft:#E6F4EA; --bad:#B42318; --bad-soft:#FDECEA;
+    --warn:#8A5300; --warn-soft:#FFF4E0; --lock:#8B90A0;
+    --radius:16px; --shadow:0 1px 2px rgba(20,24,40,.06), 0 4px 16px rgba(20,24,40,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0F1424; --card:#171E33; --ink:#F4F2ED; --muted:#A9B0C2; --line:#2A3350;
+      --brand:#46D3C6; --brand-ink:#0F1424; --brand-soft:#173B42;
+      --good:#6FD58C; --good-soft:#163323; --bad:#FF8A7A; --bad-soft:#3A1D1D;
+      --warn:#F2B35A; --warn-soft:#3A2C14; --lock:#7E869B; --shadow:none; }
+  }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 Inter, system-ui, sans-serif; }
-  header { padding:20px 28px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:16px; }
-  header h1 { margin:0; font-size:22px; } header span { color:var(--muted); }
-  main { display:grid; grid-template-columns: 340px 1fr 1fr; gap:16px; padding:16px 28px 40px; }
-  @media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
-  section { background:var(--panel); border-radius:14px; padding:18px; }
-  h2 { font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--teal); margin:0 0 12px; }
-  label { display:block; margin:8px 0 4px; color:var(--muted); font-size:13px; }
-  input, select { width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:#0F1424; color:var(--text); }
-  .check { display:flex; gap:8px; align-items:center; margin:8px 0; color:var(--text); }
-  .check input { width:auto; }
-  button { background:var(--teal); color:#0F1424; border:0; border-radius:8px; padding:9px 14px; font-weight:600; cursor:pointer; margin:4px 4px 4px 0; }
-  button.ghost { background:transparent; color:var(--teal); border:1px solid var(--teal); }
-  button:disabled { opacity:.4; cursor:default; }
-  .bar { height:10px; background:#0F1424; border-radius:6px; overflow:hidden; }
-  .bar > div { height:100%; background:var(--teal); }
-  .skill { margin:10px 0; } .skill .row { display:flex; justify-content:space-between; font-size:13px; }
-  .muted { color:var(--muted); font-size:13px; }
-  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; background:#1F2A45; margin:2px; }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  td, th { text-align:left; padding:6px 4px; border-bottom:1px solid var(--line); }
-  .ok { color:var(--teal); } .no { color:var(--bad); } .warn { color:var(--amber); }
-  .item { background:#0F1424; border-radius:10px; padding:14px; margin:10px 0; }
-  .opts button { display:block; width:100%; text-align:left; background:#1F2A45; color:var(--text); }
-  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
-  .stat { background:#0F1424; border-radius:10px; padding:10px; } .stat b { font-size:20px; display:block; }
-  pre { white-space:pre-wrap; word-break:break-all; font-size:11px; color:var(--muted); max-height:200px; overflow:auto; }
+  html { font-size:16px; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:1rem/1.55 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color:var(--brand); }
+  :focus-visible { outline:3px solid var(--brand); outline-offset:2px; border-radius:8px; }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
+  .wrap { max-width:1180px; margin:0 auto; padding:16px; }
+  .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+  header.top { display:flex; align-items:center; gap:8px; padding:8px 0 16px; }
+  header.top button { min-height:44px; padding:8px 12px; white-space:nowrap; }
+  @media (max-width: 420px) { .logo { font-size:1rem; } header.top button { padding:8px 10px; font-size:.9rem; } }
+  .logo { font-weight:700; font-size:1.15rem; display:flex; align-items:center; gap:8px; }
+  .logo span.dot { width:12px; height:12px; border-radius:50%; background:var(--brand); display:inline-block; }
+  .spacer { flex:1; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
+  h1 { font-size:clamp(1.6rem, 4vw, 2.4rem); line-height:1.15; margin:0 0 8px; }
+  h2 { font-size:1.15rem; margin:0 0 12px; }
+  h3 { font-size:1rem; margin:0 0 6px; }
+  p { margin:0 0 10px; }
+  .muted { color:var(--muted); }
+  .small { font-size:.875rem; }
+  button, .btn { font:inherit; font-weight:600; border-radius:12px; border:2px solid transparent; padding:12px 18px; min-height:48px; cursor:pointer; background:var(--brand); color:var(--brand-ink); }
+  button.secondary { background:transparent; color:var(--brand); border-color:var(--brand); }
+  button.quiet { background:transparent; color:var(--muted); border-color:var(--line); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  button.big { width:100%; font-size:1.05rem; padding:14px 20px; }
+  label.field { display:block; margin:14px 0 6px; font-weight:600; }
+  input[type=text], input[type=number], select { width:100%; font:inherit; padding:12px 14px; min-height:48px; border-radius:12px; border:2px solid var(--line); background:var(--card); color:var(--ink); }
+  input:focus, select:focus { border-color:var(--brand); outline:none; }
+  .err { color:var(--bad); font-size:.9rem; margin-top:4px; min-height:1.2em; }
+  /* welcome */
+  .steps { display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 4px; }
+  .steps span { background:var(--brand-soft); color:var(--ink); border-radius:999px; padding:6px 12px; font-size:.9rem; }
+  .welcome { display:grid; grid-template-columns:1.1fr 1fr; gap:20px; align-items:start; }
+  @media (max-width: 860px) { .welcome { grid-template-columns:1fr; } }
+  .modes { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:6px; }
+  @media (max-width: 480px) { .modes { grid-template-columns:1fr; } }
+  .mode { position:relative; display:block; border:2px solid var(--line); border-radius:14px; padding:14px; cursor:pointer; background:var(--card); }
+  .mode input { position:absolute; opacity:0; }
+  .mode b { display:block; font-size:1.05rem; margin-bottom:2px; }
+  .mode:has(input:checked) { border-color:var(--brand); background:var(--brand-soft); }
+  .mode:has(input:focus-visible) { outline:3px solid var(--brand); outline-offset:2px; }
+  .switch { display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:14px; background:var(--bg); margin-top:14px; }
+  .switch input { width:24px; height:24px; margin-top:2px; accent-color:var(--brand); flex:none; }
+  .note { padding:10px 12px; border-radius:12px; background:var(--warn-soft); color:var(--ink); font-size:.9rem; margin-top:8px; }
+  /* session */
+  .progress-top { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+  .meter { height:12px; background:var(--line); border-radius:999px; overflow:hidden; position:relative; }
+  .meter > i { position:absolute; inset:0 auto 0 0; background:var(--brand); border-radius:999px; transition:width .4s ease; }
+  .meter.goal::after { content:""; position:absolute; top:-2px; bottom:-2px; left:95%; width:2px; background:var(--ink); opacity:.35; }
+  .layout { display:grid; grid-template-columns:minmax(0, 1.6fr) minmax(280px, 1fr); gap:16px; align-items:start; }
+  .layout { grid-template-rows:auto 1fr; }
+  .layout > #stage { grid-column:1; grid-row:1; }
+  .layout > aside { grid-column:2; grid-row:1 / span 2; }
+  .layout > #hood { grid-column:1; grid-row:2; }
+  @media (max-width: 900px) { .layout { grid-template-columns:1fr; }
+    .layout > #stage, .layout > aside, .layout > #hood { grid-column:1; grid-row:auto; } }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+  .chip { font-size:.8rem; font-weight:600; padding:4px 10px; border-radius:999px; background:var(--bg); border:1px solid var(--line); }
+  .chip.brand { background:var(--brand-soft); border-color:transparent; }
+  .prompt { font-size:clamp(1.2rem, 3vw, 1.5rem); font-weight:600; line-height:1.35; margin:6px 0 14px; }
+  .tip { background:var(--brand-soft); border-radius:12px; padding:10px 14px; margin-bottom:14px; }
+  .options { display:grid; gap:10px; }
+  .opt { display:flex; align-items:center; gap:12px; text-align:left; background:var(--card); color:var(--ink); border:2px solid var(--line); font-weight:500; padding:12px 14px; }
+  .opt kbd { flex:none; display:inline-grid; place-items:center; width:30px; height:30px; border-radius:8px; background:var(--bg); border:1px solid var(--line); font:600 .9rem Inter, system-ui, sans-serif; }
+  .opt:hover:not(:disabled) { border-color:var(--brand); }
+  .opt:disabled { opacity:.75; cursor:default; } .opt.right, .opt.wrong { opacity:1; }
+  .opt.right { border-color:var(--good); background:var(--good-soft); }
+  .opt.wrong { border-color:var(--bad); background:var(--bad-soft); }
+  .feedback { border-radius:14px; padding:14px 16px; margin-top:14px; }
+  .feedback.good { background:var(--good-soft); } .feedback.bad { background:var(--bad-soft); }
+  .feedback b { display:block; font-size:1.05rem; }
+  details.why { margin-top:14px; border-top:1px solid var(--line); padding-top:10px; }
+  details.why summary { cursor:pointer; font-weight:600; color:var(--brand); min-height:32px; }
+  details.why ul { margin:8px 0 0; padding-left:20px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+  .count { font-size:3rem; font-weight:700; font-variant-numeric:tabular-nums; }
+  .center { text-align:center; }
+  /* skills */
+  .skill { display:grid; grid-template-columns:32px 1fr; gap:10px; padding:12px 0; border-bottom:1px solid var(--line); }
+  .skill:last-child { border-bottom:0; }
+  .icon { width:32px; height:32px; border-radius:50%; display:grid; place-items:center; font-size:.95rem; font-weight:700; background:var(--bg); border:2px solid var(--line); }
+  .s-locked .icon { color:var(--lock); } .s-locked .name { color:var(--muted); }
+  .s-ready .icon { border-color:var(--brand); color:var(--brand); }
+  .s-learning .icon { border-color:var(--warn); color:var(--warn); }
+  .s-mastered .icon, .s-credentialed .icon { background:var(--good); border-color:var(--good); color:var(--card); }
+  .skill .name { font-weight:600; }
+  .skill .meter { margin:6px 0 4px; height:8px; }
+  .skill .meter > i { background:var(--warn); }
+  .s-mastered .meter > i, .s-credentialed .meter > i { background:var(--good); }
+  .skill button { margin-top:8px; min-height:40px; padding:8px 14px; }
+  /* state + creds */
+  .gauges { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .gauge { background:var(--bg); border-radius:12px; padding:10px; text-align:center; }
+  .gauge b { display:block; font-size:1.05rem; }
+  .cred { border:2px solid var(--good); border-radius:14px; padding:12px 14px; margin-top:10px; }
+  .cred .ok { color:var(--good); font-weight:600; }
+  pre { white-space:pre-wrap; word-break:break-all; font-size:.75rem; max-height:220px; overflow:auto; background:var(--bg); padding:10px; border-radius:10px; }
+  /* watch */
+  .timeline { display:flex; gap:4px; flex-wrap:wrap; margin-top:12px; }
+  .timeline i { width:14px; height:14px; border-radius:4px; background:var(--line); }
+  .timeline i.c { background:var(--good); } .timeline i.x { background:var(--bad); } .timeline i.b { background:var(--warn); }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; font-size:.8rem; margin-top:6px; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:4px; vertical-align:middle; }
+  /* hood */
+  details.hood { margin-top:16px; }
+  details.hood > summary { cursor:pointer; font-weight:600; padding:12px 0; }
+  table { width:100%; border-collapse:collapse; font-size:.85rem; }
+  th, td { text-align:left; padding:6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .scroll { overflow-x:auto; }
+  /* toast + modal */
+  #toasts { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); display:grid; gap:8px; z-index:20; width:min(92vw, 460px); }
+  .toast { background:var(--ink); color:var(--bg); padding:12px 16px; border-radius:12px; box-shadow:0 6px 24px rgba(0,0,0,.2); }
+  dialog { border:0; border-radius:20px; padding:0; max-width:560px; width:92vw; background:var(--card); color:var(--ink); }
+  dialog::backdrop { background:rgba(10,14,25,.5); }
+  dialog .inner { padding:22px; }
+  dialog ol { padding-left:20px; } dialog li { margin-bottom:10px; }
+  [hidden] { display:none !important; }
 </style>
 </head>
 <body>
-<header><h1>Cognitive Twin</h1><span>Multi-agent reinforcement learning for personalised education</span></header>
-<main>
-  <div>
-    <section>
-      <h2>Enrol a learner</h2>
-      <label>Name</label><input id="name" value="Asha">
-      <label>Age</label><input id="age" type="number" value="22">
-      <label>Region</label>
-      <select id="region"><option>IN</option><option>US</option><option>EU</option><option>UK</option></select>
-      <div class="check"><input id="optin" type="checkbox" checked><span>Opt in to neural sensing</span></div>
-      <div class="check"><input id="guardian" type="checkbox"><span>Guardian consent (under 18)</span></div>
-      <label>Mode</label>
-      <select id="mode"><option value="sim">Simulated learner (demo)</option><option value="human">I'll answer myself</option></select>
-      <button onclick="enrol()">Enrol</button>
-      <p id="consent" class="muted"></p>
+<div class="wrap">
+  <header class="top">
+    <div class="logo"><span class="dot" aria-hidden="true"></span>Cognitive Twin</div>
+    <div class="spacer"></div>
+    <button class="quiet" id="howBtn" type="button">How it works</button>
+    <button class="quiet" id="restartBtn" type="button" hidden>Start over</button>
+  </header>
+
+  <!-- ========== WELCOME ========== -->
+  <main id="welcome" class="welcome">
+    <section class="card">
+      <h1>Learn machine learning with a tutor team that adapts to you</h1>
+      <p class="muted">Three AI tutors work together: one plans what you learn next, one picks each question, and one notices when you need a break.</p>
+      <div class="steps" aria-label="How a session goes">
+        <span>1 · We find your level</span><span>2 · Every question is picked for you</span><span>3 · Earn a credential you can prove</span>
+      </div>
+      <p class="small muted" style="margin-top:14px">Track: Machine Learning Foundations · 7 skills · no sign-up, nothing is stored after you close the page.</p>
     </section>
-    <section style="margin-top:16px">
-      <h2>Validator DAO</h2>
-      <div id="dao" class="muted">Loading…</div>
+
+    <section class="card" aria-labelledby="startTitle">
+      <h2 id="startTitle">Let's get started</h2>
+      <form id="startForm" novalidate>
+        <fieldset style="border:0;padding:0;margin:0">
+          <legend class="sr">Choose how to use Cognitive Twin</legend>
+          <div class="modes">
+            <label class="mode"><input type="radio" name="mode" value="learn" checked><b>Learn it myself</b><span class="small muted">Answer questions. The tutors adapt as you go.</span></label>
+            <label class="mode"><input type="radio" name="mode" value="watch"><b>Watch a demo</b><span class="small muted">See the tutors teach a simulated student in fast-forward.</span></label>
+          </div>
+        </fieldset>
+
+        <label class="field" for="name" id="nameLabel">What should we call you?</label>
+        <input id="name" type="text" autocomplete="given-name" maxlength="40" placeholder="Your first name">
+        <div class="err" id="nameErr" aria-live="polite"></div>
+
+        <label class="field" for="age">How old are you?</label>
+        <input id="age" type="number" inputmode="numeric" min="5" max="120" placeholder="e.g. 22">
+        <div class="err" id="ageErr" aria-live="polite"></div>
+
+        <label class="field" for="region">Where are you?</label>
+        <select id="region">
+          <option value="IN">India</option><option value="US">United States</option>
+          <option value="UK">United Kingdom</option><option value="EU">European Union</option>
+          <option value="OT">Somewhere else</option>
+        </select>
+
+        <div class="switch" id="guardianRow" hidden>
+          <input type="checkbox" id="guardian">
+          <label for="guardian"><b>A parent or guardian has said yes</b><br><span class="small muted">Needed for learners under 18.</span></label>
+        </div>
+
+        <p class="small muted" id="noHeadband" style="margin-top:14px">No headband needed: the tutors adapt from your answers.</p>
+        <div class="switch" id="optinRow" hidden>
+          <input type="checkbox" id="optin">
+          <label for="optin"><b>Give the demo student a focus headband</b> <span class="small muted">(simulated)</span><br>
+            <span class="small muted">Lets the tutors notice tiredness or overload. Brain signals never leave the headband; only three numbers do.</span></label>
+        </div>
+        <div class="note" id="optinNote" hidden></div>
+
+        <div class="err" id="formErr" aria-live="assertive"></div>
+        <button class="big" type="submit" id="startBtn">Start learning</button>
+      </form>
     </section>
+  </main>
+
+  <!-- ========== SESSION ========== -->
+  <main id="session" hidden>
+    <div class="progress-top">
+      <div style="flex:1;min-width:220px">
+        <h1 id="hello" style="font-size:1.4rem;margin:0">Hi</h1>
+        <div class="small muted" id="progressText"></div>
+        <div class="meter" style="margin-top:6px" role="progressbar" aria-label="Skills mastered" id="progressBar" aria-valuemin="0"><i id="progressFill" style="width:0"></i></div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <section class="card" id="stage" aria-live="polite"></section>
+
+      <aside>
+        <section class="card">
+          <h2 id="pathTitle">Your learning path</h2>
+          <p class="small muted" id="pathHint">The bar shows how sure the tutors are that you know each skill. The line marks the 95% goal.</p>
+          <div id="skills"></div>
+        </section>
+
+        <section class="card" style="margin-top:16px">
+          <h2 id="stateTitle">How you're doing right now</h2>
+          <div id="state"></div>
+        </section>
+
+        <section class="card" style="margin-top:16px">
+          <h2 id="credTitle">Your credentials</h2>
+          <div id="creds"><p class="muted small">Master a skill to claim a credential. Validators check your answers (never your brain data) and sign it.</p></div>
+        </section>
+      </aside>
+
+        <details class="hood card" id="hood" style="margin-top:0">
+          <summary>Under the hood <span class="small muted">· for the curious</span></summary>
+          <h3 style="margin-top:8px">What each agent decided</h3>
+          <div class="scroll"><table><thead><tr><th>#</th><th>Plan (curriculum agent)</th><th>Question (tutor agent)</th><th>Result</th></tr></thead><tbody id="hoodLog"></tbody></table></div>
+          <h3 style="margin-top:16px">Safety guardian</h3>
+          <p class="small muted">Rules the agents can't break. Every time one stepped in, it's listed here.</p>
+          <div id="hoodGuard" class="small"></div>
+          <h3 style="margin-top:16px">Validator network</h3>
+          <p class="small muted">Independent organisations that must agree (two thirds of their stake) before a credential is issued.</p>
+          <div id="hoodDao" class="small"></div>
+          <h3 style="margin-top:16px">Raw model state</h3>
+          <pre id="hoodRaw"></pre>
+        </details>
+    </div>
+  </main>
+</div>
+
+<div id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<dialog id="howDialog" aria-labelledby="howTitle">
+  <div class="inner">
+    <h2 id="howTitle">How Cognitive Twin works</h2>
+    <ol>
+      <li><b>A model of you.</b> Every answer updates how sure the tutors are that you know each skill.</li>
+      <li><b>Three tutors, one goal.</b> The <i>planner</i> picks the skill, the <i>question-picker</i> chooses difficulty and style, and the <i>pacer</i> calls breaks. They learned how to teach by practising on thousands of simulated students.</li>
+      <li><b>A safety guardian.</b> Simple rules the tutors can't break: no locked skills, no stretch questions for beginners, and a break at least every 25 questions.</li>
+      <li><b>Credentials you can prove.</b> When you master a skill, independent validators check your answers and sign a credential anyone can verify.</li>
+      <li><b>Your privacy.</b> The headband is optional and simulated here. Brain signals stay on the device, they never affect your credentials, and the headband is always off for under-16s and in the EU.</li>
+    </ol>
+    <div class="row"><button type="button" id="howClose">Got it</button></div>
   </div>
+</dialog>
 
-  <section>
-    <h2>Cognitive twin</h2>
-    <div id="who" class="muted">Enrol a learner to begin.</div>
-    <div class="stats">
-      <div class="stat"><span class="muted">Attention</span><b id="att">–</b></div>
-      <div class="stat"><span class="muted">Load</span><b id="load">–</b></div>
-      <div class="stat"><span class="muted">Fatigue est.</span><b id="fat">–</b></div>
-    </div>
-    <div id="skills"></div>
-    <h2 style="margin-top:18px">Credentials</h2>
-    <div id="creds" class="muted">None yet.</div>
-  </section>
-
-  <section>
-    <h2>Agents at work</h2>
-    <div>
-      <button id="btnNext" onclick="next()" disabled>Next step</button>
-      <button id="btnAuto" class="ghost" onclick="autoplay(20)" disabled>Autoplay 20</button>
-    </div>
-    <div id="item"></div>
-    <table><thead><tr><th>Step</th><th>Curriculum</th><th>Tutor</th><th>Result</th></tr></thead>
-      <tbody id="log"></tbody></table>
-    <h2 style="margin-top:18px">Guardian interventions</h2>
-    <div id="guard" class="muted">None.</div>
-  </section>
-</main>
 <script>
-let sid = null, state = null, pending = null;
+"use strict";
 const $ = id => document.getElementById(id);
-const api = async (path, body) => {
-  const r = await fetch(path, body === undefined ? {} : {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
-  const j = await r.json();
-  if (!r.ok) throw new Error(j.detail || r.statusText);
-  return j;
-};
-const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LETTERS = ["A","B","C","D"];
+let S = { sid:null, mode:"learn", view:null, decision:null, answered:false, playing:false, timer:null, breakTimer:null, recent:[], done:false, busy:false };
 
-async function enrol() {
-  try {
-    state = await api('/api/learners', {name: $('name').value, age: +$('age').value, region: $('region').value,
-      neural_opt_in: $('optin').checked, guardian_consent: $('guardian').checked, simulated: $('mode').value === 'sim'});
-    sid = state.id; render();
-    $('btnNext').disabled = false; $('btnAuto').disabled = !state.simulated;
-  } catch (e) { $('consent').innerHTML = `<span class="no">${esc(e.message)}</span>`; }
+async function api(path, body) {
+  const opts = body === undefined ? {} : { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) };
+  let r;
+  try { r = await fetch(path, opts); } catch { throw new Error("Can't reach the server. Check it's running and try again."); }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(typeof j.detail === "string" ? j.detail : "Something went wrong. Please try again.");
+  return j;
+}
+function toast(msg, ms = 3500) {
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
+  $("toasts").appendChild(t); setTimeout(() => t.remove(), ms);
 }
 
-async function refresh() { state = await api(`/api/learners/${sid}`); render(); }
+/* ---------- welcome ---------- */
+function updateConsentHints() {
+  const age = parseInt($("age").value, 10), region = $("region").value;
+  const opt = $("optin").checked && !$("optinRow").hidden;
+  $("guardianRow").hidden = !(age > 0 && age < 18);
+  let note = "";
+  if (opt && age > 0 && age < 16) note = "The headband stays off for anyone under 16. The tutors still adapt fully from answers.";
+  else if (opt && region === "EU") note = "In the EU, focus readings stay off by law. The tutors still adapt fully from answers.";
+  $("optinNote").hidden = !note; $("optinNote").textContent = note;
+}
+function updateModeText() {
+  const watch = document.querySelector("input[name=mode]:checked").value === "watch";
+  $("nameLabel").textContent = watch ? "Name your demo student" : "What should we call you?";
+  $("name").placeholder = watch ? "e.g. Asha" : "Your first name";
+  $("startBtn").textContent = watch ? "Start the demo" : "Start learning";
+  $("optinRow").hidden = !watch; $("noHeadband").hidden = watch;
+  $("optin").checked = watch;  // the demo shows the headband by default
+  updateConsentHints();
+}
+["age","region","optin"].forEach(id => $(id).addEventListener("input", updateConsentHints));
+document.querySelectorAll("input[name=mode]").forEach(r => r.addEventListener("change", updateModeText));
 
-async function next() {
-  if (state.simulated) { await autoplay(1); return; }
-  const d = await api(`/api/learners/${sid}/next`, {});
-  if (d.action === 'break') {
-    $('item').innerHTML = `<div class="item"><b class="warn">Pacing agent: take a short break.</b>
-      <p class="muted">Proposed: ${esc(d.proposed_action)}</p><button onclick="doBreak()">Done resting</button></div>`;
+$("startForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const name = $("name").value.trim(), age = parseInt($("age").value, 10);
+  $("nameErr").textContent = name ? "" : "Please enter a name.";
+  $("ageErr").textContent = age >= 5 && age <= 120 ? "" : "Please enter an age between 5 and 120.";
+  $("formErr").textContent = "";
+  if (!name) return $("name").focus();
+  if (!(age >= 5 && age <= 120)) return $("age").focus();
+  if (age < 18 && !$("guardian").checked) { $("formErr").textContent = "Learners under 18 need a parent or guardian's permission. Tick the box above to continue."; return $("guardian").focus(); }
+  S.mode = document.querySelector("input[name=mode]:checked").value;
+  $("startBtn").disabled = true; $("startBtn").textContent = "Setting up your tutors…";
+  try {
+    S.view = await api("/api/learners", { name, age, region: $("region").value, neural_opt_in: S.mode === "watch" && $("optin").checked,
+      guardian_consent: $("guardian").checked, simulated: S.mode === "watch" });
+    S.sid = S.view.id;
+    $("welcome").hidden = true; $("session").hidden = false; $("restartBtn").hidden = false;
+    window.scrollTo(0, 0);
+    renderSide();
+    if (S.mode === "learn") await nextQuestion(); else renderWatch();
+    $("stage").focus?.();
+  } catch (err) {
+    $("formErr").textContent = err.message;
+  } finally { $("startBtn").disabled = false; updateModeText(); }
+});
+
+/* ---------- learn mode ---------- */
+async function nextQuestion(skipBreak = false) {
+  if (S.busy) return; S.busy = true;
+  try {
+    S.decision = await api(`/api/learners/${S.sid}/next`, { skip_break: skipBreak }); S.answered = false;
+    if (S.decision.action === "break") renderBreak(); else renderQuestion();
+  } catch (e) { toast(e.message); } finally { S.busy = false; }
+}
+function whyBlock(ex) {
+  if (!ex || !ex.reasons || !ex.reasons.length) return "";
+  return `<details class="why"><summary>Why this question?</summary><ul>${ex.reasons.map(r => `<li>${esc(r)}</li>`).join("")}</ul></details>`;
+}
+function renderQuestion() {
+  const d = S.decision, ex = d.explanation || {};
+  $("stage").innerHTML = `
+    <div class="chips"><span class="chip brand">${esc(d.item.skill_name)}</span><span class="chip">${esc(ex.difficulty_label)}</span><span class="chip">${esc(ex.modality_label)}</span></div>
+    <h2 class="sr">Question</h2>
+    <p class="prompt" id="prompt">${esc(d.item.prompt)}</p>
+    ${d.item.tip ? `<div class="tip"><b>Tip:</b> ${esc(d.item.tip)}</div>` : ""}
+    <div class="options" role="group" aria-labelledby="prompt">
+      ${d.item.options.map((o, i) => `<button class="opt" data-i="${i}" type="button"><kbd aria-hidden="true">${LETTERS[i]}</kbd><span>${esc(o)}</span></button>`).join("")}
+    </div>
+    <p class="small muted" style="margin-top:10px">Tip: press A–D or 1–4 to answer.</p>
+    <div id="fb"></div>
+    ${whyBlock(ex)}`;
+  $("stage").querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => answer(+b.dataset.i)));
+  $("stage").querySelector(".opt").focus({ preventScroll:true });
+}
+async function answer(i) {
+  if (S.answered || S.busy) return; S.answered = true; S.busy = true;
+  const btns = [...$("stage").querySelectorAll(".opt")]; btns.forEach(b => b.disabled = true);
+  try {
+    const r = await api(`/api/learners/${S.sid}/answer`, { item_id: S.decision.item.id, choice: i });
+    btns[r.answer].classList.add("right"); if (!r.correct) btns[i].classList.add("wrong");
+    $("fb").innerHTML = `<div class="feedback ${r.correct ? "good" : "bad"}" role="status">
+      <b>${r.correct ? "Nice, that's right!" : `Not quite. The answer is ${LETTERS[r.answer]}.`}</b>
+      ${r.correct ? "" : `<span>${esc(r.hint)}</span>`}
+      <div class="small" style="margin-top:4px">The tutors are now ${Math.round(r.belief * 100)}% sure you know this skill.</div>
+      <div class="row"><button type="button" id="nextBtn">Next question →</button><span class="small muted">or press Enter</span></div></div>`;
+    $("nextBtn").addEventListener("click", () => nextQuestion()); $("nextBtn").focus({ preventScroll:true });
+    await refresh();
+  } catch (e) { toast(e.message); S.answered = false; btns.forEach(b => b.disabled = false); }
+  finally { S.busy = false; }
+}
+function renderBreak() {
+  const ex = S.decision.explanation || {};
+  if (S.decision.proposed_action === "done") {
+    $("stage").innerHTML = `<div class="center"><h2 style="font-size:1.6rem">🎉 You've mastered every skill!</h2>
+      <p class="muted">Claim your remaining credentials from your learning path.</p></div>`;
     return;
   }
-  pending = d;
-  $('item').innerHTML = `<div class="item"><div class="muted">${esc(d.item.skill_name)} · difficulty ${d.difficulty} · ${esc(d.modality.replace('_',' '))}</div>
-    <p><b>${esc(d.item.prompt)}</b></p><div class="opts">${d.item.options.map((o,i)=>`<button onclick="answer(${i})">${esc(o)}</button>`).join('')}</div></div>`;
+  const secs = ex.break_seconds || 60;
+  $("stage").innerHTML = `<div class="center">
+    <h2 style="font-size:1.4rem">☕ ${esc(ex.headline || "Time for a short break")}</h2>
+    <p class="muted">${(ex.reasons || []).map(esc).join(" ")}</p>
+    <div class="row" style="justify-content:center">
+      <button type="button" id="takeBtn">Take the break</button>
+      <button type="button" class="secondary" id="skipBtn">Keep going</button></div></div>`;
+  $("takeBtn").addEventListener("click", () => startBreak(secs));
+  $("skipBtn").addEventListener("click", () => nextQuestion(true));
+  $("takeBtn").focus({ preventScroll:true });
+}
+function startBreak(secs) {
+  let left = secs;
+  $("stage").innerHTML = `<div class="center">
+    <h2 style="font-size:1.4rem">☕ Enjoy your break</h2>
+    <p class="muted">Stand up, stretch, look at something far away.</p>
+    <div class="count" id="count" aria-live="off">${left}s</div>
+    <div class="row" style="justify-content:center"><button type="button" id="backBtn">I'm back. Continue</button></div></div>`;
+  clearInterval(S.breakTimer);
+  S.breakTimer = setInterval(() => { left -= 1; const c = $("count"); if (c) c.textContent = left > 0 ? `${left}s` : "Ready when you are"; if (left <= 0) clearInterval(S.breakTimer); }, 1000);
+  $("backBtn").addEventListener("click", endBreak); $("backBtn").focus({ preventScroll:true });
+}
+async function endBreak() {
+  clearInterval(S.breakTimer);
+  try { await api(`/api/learners/${S.sid}/break`, {}); await refresh(); await nextQuestion(); } catch (e) { toast(e.message); }
 }
 
-async function answer(i) {
-  const r = await api(`/api/learners/${sid}/answer`, {item_id: pending.item.id, choice: i});
-  $('item').innerHTML = `<div class="item"><b class="${r.correct?'ok':'no'}">${r.correct?'Correct':'Not quite'}</b>
-    <p class="muted">${esc(r.hint)} Belief now ${r.belief}.</p></div>`;
-  await refresh();
+/* ---------- watch mode ---------- */
+function renderWatch(entry) {
+  const name = esc(S.view.name);
+  let body;
+  if (!entry) body = `<p class="muted">Press <b>Play</b> to watch the tutor team teach ${name}, a simulated student with their own strengths, preferred learning style and stamina.</p>`;
+  else if (entry.action === "break") body = `<p class="prompt">☕ ${esc(entry.explanation?.headline || "Break")}</p><p class="muted">${esc((entry.explanation?.reasons || []).join(" "))}</p>`;
+  else body = `<div class="chips"><span class="chip brand">${esc(skillName(entry.skill))}</span><span class="chip">${esc(entry.explanation?.difficulty_label)}</span><span class="chip">${esc(entry.explanation?.modality_label)}</span></div>
+      <p class="prompt">${entry.correct ? "✅" : "❌"} ${name} ${entry.correct ? "got it right" : "missed this one"}</p>
+      <p class="muted">The tutors are now ${Math.round(entry.belief * 100)}% sure ${name} knows ${esc(skillName(entry.skill))}.</p>
+      ${whyBlock(entry.explanation)}`;
+  const label = S.done ? "Finished" : S.playing ? "⏸ Pause" : "▶ Play";
+  $("stage").innerHTML = `<h2>Watching ${name} learn</h2>${body}
+    <div class="row">
+      <button type="button" id="playBtn" ${S.done ? "disabled" : ""}>${label}</button>
+      <button type="button" class="secondary" id="stepBtn" ${S.playing || S.done ? "disabled" : ""}>One step</button>
+      <label class="small" for="speed">Speed</label>
+      <select id="speed" style="width:auto;min-height:44px"><option value="1500">Slow</option><option value="700" selected>Normal</option><option value="250">Fast</option></select>
+    </div>
+    <div class="timeline" aria-label="Recent steps">${S.recent.map(r => `<i class="${r}"></i>`).join("")}</div>
+    <div class="legend"><span><i style="background:var(--good)"></i>Right</span><span><i style="background:var(--bad)"></i>Wrong</span><span><i style="background:var(--warn)"></i>Break</span></div>
+    <p class="small muted" style="margin-top:8px">Misses are expected: the tutors deliberately pick questions slightly above the student's level, because that's where people learn fastest.</p>`;
+  $("speed").value = S.speed || "700";
+  $("speed").addEventListener("change", e => { S.speed = e.target.value; if (S.playing) { stopPlay(); startPlay(); } });
+  $("playBtn").addEventListener("click", () => S.playing ? stopPlay() : startPlay());
+  $("stepBtn").addEventListener("click", watchStep);
+}
+function skillName(id) { return (S.view.skills.find(s => s.id === id) || {}).name || id; }
+async function watchStep() {
+  if (S.busy) return; S.busy = true;
+  try {
+    const r = await api(`/api/learners/${S.sid}/autoplay`, { steps: 1 });
+    S.view = r; const e = r.steps[0];
+    S.recent.push(e.action === "break" ? "b" : e.correct ? "c" : "x"); if (S.recent.length > 40) S.recent.shift();
+    if (e.action === "break" && e.explanation && e.explanation.reasons.length === 0) { S.done = true; stopPlay(); toast("Every skill mastered!"); }
+    const was = S.playing; renderSide(); renderWatch(e);
+    if (was) $("playBtn").focus({ preventScroll:true });
+  } catch (err) { stopPlay(); toast(err.message); } finally { S.busy = false; }
+}
+function startPlay() { S.playing = true; watchStep(); S.timer = setInterval(watchStep, +(S.speed || 700)); renderWatchControls(); }
+function stopPlay() { S.playing = false; clearInterval(S.timer); renderWatchControls(); }
+function renderWatchControls() {
+  const p = $("playBtn"), s = $("stepBtn"); if (!p) return;
+  p.textContent = S.done ? "Finished" : S.playing ? "⏸ Pause" : "▶ Play"; p.disabled = S.done; s.disabled = S.playing || S.done;
 }
 
-async function doBreak() { await api(`/api/learners/${sid}/break`, {}); $('item').innerHTML=''; await refresh(); }
+/* ---------- sidebar ---------- */
+async function refresh() { S.view = await api(`/api/learners/${S.sid}`); renderSide(); }
+const ICON = { locked:"🔒", ready:"○", learning:"…", mastered:"✓", credentialed:"★" };
+const STATUS_TEXT = { locked:"Locked", ready:"Ready", learning:"Learning", mastered:"Mastered", credentialed:"Credential earned" };
+function renderSide() {
+  const v = S.view, who = S.mode === "watch" ? v.name : "you";
+  $("hello").textContent = S.mode === "watch" ? `Demo: ${v.name}` : `Hi ${v.name} 👋`;
+  const p = v.progress;
+  $("progressText").textContent = `${p.mastered} of ${p.total} skills mastered · ${p.credentials} credential${p.credentials === 1 ? "" : "s"} · ${v.track}`;
+  $("progressFill").style.width = `${100 * p.mastered / p.total}%`;
+  $("progressBar").setAttribute("aria-valuemax", p.total); $("progressBar").setAttribute("aria-valuenow", p.mastered);
+  const owner = S.mode === "watch" ? `${v.name}'s` : "Your";
+  $("pathTitle").textContent = `${owner} learning path`; $("credTitle").textContent = `${owner} credentials`;
+  $("pathHint").textContent = `The bar shows how sure the tutors are that ${who === "you" ? "you know" : who + " knows"} each skill. The line marks the 95% goal.`;
 
-async function autoplay(n) {
-  state = await api(`/api/learners/${sid}/autoplay`, {steps: n});
-  $('item').innerHTML = ''; render();
+  $("skills").innerHTML = v.skills.map(s => `
+    <div class="skill s-${s.status}">
+      <div class="icon" aria-hidden="true">${ICON[s.status]}</div>
+      <div>
+        <div class="name">${esc(s.name)} <span class="sr">, ${STATUS_TEXT[s.status]}</span></div>
+        ${s.started || s.status === "mastered" || s.status === "credentialed"
+          ? `<div class="meter goal" role="img" aria-label="${s.known_pct}% sure, goal ${s.goal_pct}%"><i style="width:${s.known_pct}%"></i></div>
+             <div class="small muted">${STATUS_TEXT[s.status]} · ${s.known_pct}% sure · ${esc(s.note)}</div>`
+          : `<div class="small muted" style="margin-top:4px">${STATUS_TEXT[s.status]} · ${esc(s.note)}</div>`}
+        ${s.can_claim ? `<button type="button" data-claim="${esc(s.id)}">Claim credential</button>` : ""}
+      </div>
+    </div>`).join("");
+  $("skills").querySelectorAll("[data-claim]").forEach(b => b.addEventListener("click", () => claim(b.dataset.claim, b)));
+
+  const t = v.twin;
+  if (v.sensing_active) {
+    const word = (x, lo, hi, a, b, c) => x < lo ? a : x < hi ? b : c;
+    $("stateTitle").textContent = S.mode === "watch" ? `How ${v.name} is doing right now` : "How you're doing right now";
+    $("state").innerHTML = `<div class="gauges">
+      <div class="gauge"><span class="small muted">Focus</span><b>${word(t.attention, .35, .6, "Low", "OK", "Sharp")}</b></div>
+      <div class="gauge"><span class="small muted">Effort</span><b>${word(t.load, .4, .7, "Easy", "Just right", "Heavy")}</b></div>
+      <div class="gauge"><span class="small muted">Energy</span><b>${word(1 - t.fatigue_estimate, .35, .7, "Tired", "OK", "Fresh")}</b></div></div>
+      <p class="small muted" style="margin-top:8px">From the simulated headband. These shape how ${S.mode === "watch" ? "the student is" : "you're"} taught, never ${S.mode === "watch" ? "their" : "your"} credentials.</p>`;
+  } else {
+    $("state").innerHTML = S.mode === "learn"
+      ? `<p class="small">No headband in this session, so the tutors read your progress from your answers and suggest breaks every so often.</p>`
+      : `<p class="small">The demo student's headband is off (${esc(v.consent.reasons.join("; ") || "not connected")}). The tutors adapt from answers alone.</p>`;
+  }
+
+  $("creds").innerHTML = v.credentials.length ? v.credentials.map(c => `
+    <div class="cred">
+      <b>★ ${esc(c.credentialSubject.name)}</b>
+      <div class="small muted">Signed by ${c.proof.length} independent validators · ${esc(c.validFrom.slice(0, 10))}</div>
+      <div class="row" style="margin-top:8px"><button type="button" class="secondary" data-verify="${esc(c.id)}">Check it's genuine</button></div>
+      <div class="small" data-result="${esc(c.id)}" role="status"></div>
+      <details class="small" style="margin-top:6px"><summary>Technical details</summary><pre>${esc(JSON.stringify(c, null, 2))}</pre></details>
+    </div>`).join("") : `<p class="muted small">Master a skill to claim a credential. Validators check ${S.mode === "watch" ? "the student's" : "your"} answers (never brain data) and sign it.</p>`;
+  $("creds").querySelectorAll("[data-verify]").forEach(b => b.addEventListener("click", () => verify(b.dataset.verify)));
+
+  renderHood();
 }
-
-async function credential(skill) {
-  const r = await api(`/api/learners/${sid}/credentials`, {skill});
-  alertBox(r.issued ? `Credential issued for ${skill}: quorum reached.` : `Refused: ${r.reason}`);
-  await refresh(); dao();
+async function claim(skill, btn) {
+  btn.disabled = true; btn.textContent = "Validators are checking…";
+  try {
+    const r = await api(`/api/learners/${S.sid}/credentials`, { skill });
+    const yes = r.votes.filter(v => v.approve).length;
+    toast(r.issued ? `★ Credential earned: ${yes} of ${r.votes.length} validators signed it.` : `Not yet: ${r.reason}`, 5000);
+    await refresh(); dao();
+  } catch (e) { toast(e.message); btn.disabled = false; btn.textContent = "Claim credential"; }
 }
-
 async function verify(id) {
-  const r = await api(`/api/credentials/${id}/verify`);
-  alertBox(`Verification: ${r.verification.valid ? 'VALID' : 'INVALID'} · signed stake ${r.verification.signed_stake} · chain intact ${r.verification.chain_intact}`);
+  const out = document.querySelector(`[data-result="${CSS.escape(id)}"]`);
+  out.textContent = "Checking signatures and the ledger…";
+  try {
+    const r = await api(`/api/credentials/${id}/verify`), v = r.verification;
+    out.innerHTML = v.valid ? `<span class="ok">✓ Genuine.</span> Signatures are valid, the signers are known validators, and it's recorded on the tamper-evident ledger.`
+                            : `<span style="color:var(--bad)">✗ This credential failed verification.</span>`;
+  } catch (e) { out.textContent = e.message; }
 }
 
-function alertBox(msg) { $('item').innerHTML = `<div class="item">${esc(msg)}</div>`; }
-
-function render() {
-  const c = state.consent;
-  $('consent').innerHTML = `Sensing: <b class="${state.sensing_active?'ok':'warn'}">${state.sensing_active?'active':'off'}</b>` +
-    (c.reasons.length ? `<br>${c.reasons.map(esc).join('<br>')}` : '');
-  const t = state.twin;
-  $('who').innerHTML = `${esc(state.name)} · ${esc(state.id)} · step ${t.step} · ${state.simulated?'simulated':'human'} learner`;
-  $('att').textContent = t.attention.toFixed(2); $('load').textContent = t.load.toFixed(2); $('fat').textContent = t.fatigue_estimate.toFixed(2);
-  $('skills').innerHTML = state.skills.map(s => {
-    const p = t.p_known[s.id], m = t.mastered.includes(s.id), f = t.frontier.includes(s.id);
-    return `<div class="skill"><div class="row"><span>${esc(s.name)} ${m?'<span class="pill ok">mastered</span>':f?'<span class="pill">frontier</span>':''}</span><span>${p.toFixed(2)}</span></div>
-      <div class="bar"><div style="width:${p*100}%;background:${m?'var(--teal)':f?'var(--amber)':'#56607a'}"></div></div>
-      ${m && !state.credentials.some(x=>x.credentialSubject.skill===s.id) ? `<button class="ghost" onclick="credential('${s.id}')">Request credential</button>`:''}</div>`;
-  }).join('');
-  $('creds').innerHTML = state.credentials.length ? state.credentials.map(x =>
-    `<div class="item"><b>${esc(x.credentialSubject.name)}</b><div class="muted">${esc(x.id)} · block ${x.ledgerAnchor.block} · ${x.proof.length} validator signatures</div>
-     <button class="ghost" onclick="verify('${x.id}')">Verify</button></div>`).join('') : 'None yet.';
-  $('log').innerHTML = state.log.slice().reverse().map(e => e.action === 'break'
-    ? `<tr><td>${e.step}</td><td colspan="2" class="warn">Pacing: break</td><td></td></tr>`
-    : `<tr><td>${e.step}</td><td>${esc(e.skill)}</td><td>d${e.difficulty} · ${esc((e.modality||'').replace('_',' '))}</td>
-       <td class="${e.correct?'ok':'no'}">${e.correct?'✓':'✗'} ${e.belief_delta>0?'+':''}${e.belief_delta}</td></tr>`).join('');
-  $('guard').innerHTML = state.interventions.length ? state.interventions.slice().reverse().map(i =>
-    `<div><span class="pill">${esc(i.agent)}</span> step ${i.step}: ${esc(i.detail)}</div>`).join('') : 'None.';
+/* ---------- under the hood ---------- */
+function renderHood() {
+  const v = S.view;
+  $("hoodLog").innerHTML = v.log.slice().reverse().map(e => e.action === "break"
+    ? `<tr><td>${e.step}</td><td colspan="2">Pacer: break</td><td></td></tr>`
+    : `<tr><td>${e.step}</td><td>${esc(skillName(e.skill))}</td><td>level ${e.difficulty} · ${esc((e.modality || "").replace(/_/g, " "))}</td><td>${e.correct ? "✓" : "✗"} ${e.belief_delta > 0 ? "+" : ""}${(e.belief_delta * 100).toFixed(1)} pts</td></tr>`).join("") || `<tr><td colspan="4" class="muted">Nothing yet.</td></tr>`;
+  $("hoodGuard").innerHTML = v.interventions.length ? v.interventions.slice().reverse().map(i => `<div>Step ${i.step} · ${esc(i.agent)}: ${esc(i.detail)}</div>`).join("") : `<span class="muted">No interventions so far. The agents stayed inside the rules.</span>`;
+  $("hoodRaw").textContent = JSON.stringify(v.twin, null, 2);
 }
-
 async function dao() {
-  const l = await api('/api/ledger');
-  $('dao').innerHTML = l.validators.map(v => `<div>${esc(v.name)} <span class="pill">stake ${v.stake}</span></div>`).join('') +
-    `<p>Chain intact: <b class="${l.chain_intact?'ok':'no'}">${l.chain_intact}</b> · ${l.blocks.length} blocks</p>`;
+  try {
+    const l = await api("/api/ledger");
+    $("hoodDao").innerHTML = l.validators.map(x => `<div>${esc(x.name)} · stake ${x.stake}</div>`).join("") + `<div class="muted">Ledger: ${l.blocks.length} blocks · ${l.chain_intact ? "intact" : "TAMPERED"}</div>`;
+  } catch {}
 }
-dao();
+
+/* ---------- global ---------- */
+document.addEventListener("keydown", e => {
+  if ($("session").hidden || S.mode !== "learn" || e.target.matches("input, select, textarea")) return;
+  const k = e.key.toUpperCase(), idx = "ABCD".indexOf(k) >= 0 ? "ABCD".indexOf(k) : "1234".indexOf(k);
+  if (idx >= 0 && !S.answered && S.decision?.action === "teach" && document.querySelectorAll(".opt").length) { e.preventDefault(); answer(idx); }
+  else if (e.key === "Enter" && S.answered && $("nextBtn") && document.activeElement !== $("nextBtn")) { e.preventDefault(); nextQuestion(); }
+});
+$("howBtn").addEventListener("click", () => $("howDialog").showModal());
+$("howClose").addEventListener("click", () => $("howDialog").close());
+$("restartBtn").addEventListener("click", () => {
+  if (!confirmRestart()) return;
+  stopPlay(); clearInterval(S.breakTimer);
+  S = { ...S, sid:null, view:null, decision:null, answered:false, recent:[], done:false };
+  $("session").hidden = true; $("welcome").hidden = false; $("restartBtn").hidden = true;
+  window.scrollTo(0, 0); $("name").focus({ preventScroll:true });
+});
+function confirmRestart() { return !S.view || S.view.twin.step === 0 || window.confirm("Start over? Your progress in this session will be cleared."); }
+updateModeText(); updateConsentHints(); dao();
 </script>
 </body>
 </html>

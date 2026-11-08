@@ -28,6 +28,7 @@ class Decision:
     pacing_state: str = ""
     tutor_ctx: np.ndarray | None = None
     proposed_action: str = ""
+    explanation: dict | None = None
 
     def as_dict(self) -> dict[str, object]:
         out: dict[str, object] = {"action": self.action, "proposed_action": self.proposed_action}
@@ -66,10 +67,15 @@ class MultiAgentTeacher:
         if self.curriculum is None:
             self.curriculum = CurriculumAgent(self.track.topological_order())
 
-    def act(self, twin: CognitiveTwin, sensing: bool, explore: bool = False) -> Decision:
+    def act(self, twin: CognitiveTwin, sensing: bool, explore: bool = False,
+            force_continue: bool = False) -> Decision:
+        """``force_continue`` lets a learner decline a suggested break."""
         p_state = self.pacing.state(twin)
-        proposed = self.pacing.act(twin, explore, self.rng)
-        action = self.guardian.pacing_override(twin, proposed, sensing)
+        if force_continue:
+            proposed = action = "continue"
+        else:
+            proposed = self.pacing.act(twin, explore, self.rng)
+            action = self.guardian.pacing_override(twin, proposed, sensing)
         if action == "break":
             return Decision("break", pacing_state=p_state, proposed_action=proposed)
         allowed = self.guardian.allowed_skills(twin)

@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 from . import __version__
 from .consent import ConsentProfile
+from .explain import skill_statuses
 from .rl.agents import TUTOR_ARMS
 from .service import LearnerSession, Platform
 
@@ -25,6 +26,10 @@ class EnrolRequest(BaseModel):
     neural_opt_in: bool = False
     guardian_consent: bool = False
     simulated: bool = True
+
+
+class NextRequest(BaseModel):
+    skip_break: bool = False
 
 
 class AnswerRequest(BaseModel):
@@ -48,15 +53,20 @@ def _session(sid: str) -> LearnerSession:
 
 
 def _view(s: LearnerSession) -> dict:
+    creds = [platform.ledger.credentials[c] for c in s.credentials]
+    credentialed = {c["credentialSubject"]["skill"] for c in creds}
+    skills = skill_statuses(s.twin, credentialed)
     return {
         "id": s.id, "name": s.name, "simulated": s.simulated is not None,
         "consent": s.consent.explain(), "sensing_active": s.edge.active,
         "twin": s.twin.snapshot(),
-        "skills": [{"id": k, "name": v.name, "prereqs": list(v.prereqs)}
-                   for k, v in platform.track.skills.items()],
+        "skills": skills,
+        "track": platform.track.name,
+        "progress": {"mastered": sum(x["status"] in ("mastered", "credentialed") for x in skills),
+                     "total": len(skills), "credentials": len(creds)},
         "interventions": [i.as_dict() for i in s.teacher.guardian.log[-20:]],
         "log": s.log[-30:],
-        "credentials": [platform.ledger.credentials[c] for c in s.credentials],
+        "credentials": creds,
     }
 
 
@@ -86,13 +96,16 @@ def learner(sid: str) -> dict:
 
 
 @app.post("/api/learners/{sid}/next")
-def next_step(sid: str) -> dict:
+def next_step(sid: str, req: NextRequest | None = None) -> dict:
     s = _session(sid)
-    d = platform.next_decision(s)
+    d = platform.next_decision(s, skip_break=bool(req and req.skip_break))
     out = d.as_dict()
+    out["explanation"] = d.explanation
     if d.action == "teach":
         out["item"] = {"id": d.item.id, "prompt": d.item.prompt, "options": list(d.item.options),
-                       "skill_name": platform.track.skills[d.skill].name}
+                       "skill_name": platform.track.skills[d.skill].name,
+                       # worked examples show the tip up front; other styles keep it back
+                       "tip": d.item.hint if d.modality == "worked_example" else None}
     return out
 
 

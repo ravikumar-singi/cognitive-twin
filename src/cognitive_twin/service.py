@@ -20,12 +20,19 @@ import numpy as np
 from .consent import ConsentProfile
 from .edge.sensor import EdgeProcessor, NeuralBand
 from .env.simulator import SimulatedLearner
+from .explain import explain
 from .ledger.ledger import Ledger
 from .rl.agents import CurriculumAgent, PacingAgent, TutorAgent
 from .rl.shield import Guardian
 from .rl.teacher import Decision, MultiAgentTeacher
 from .skills import Track, load_track
 from .twin import CognitiveTwin
+
+# People find frequent break prompts annoying, so live human sessions space
+# them out and respect a "keep going" for a while. The Guardian's hard limit
+# (a break at least every 25 questions) is still offered as a suggestion.
+HUMAN_MIN_QUESTIONS_BETWEEN_BREAKS = 8
+DECLINED_BREAK_COOLDOWN = 6
 
 
 def bundled_policy_path() -> Path:
@@ -51,6 +58,7 @@ class LearnerSession:
     edge: EdgeProcessor
     simulated: SimulatedLearner | None
     pending: Decision | None = None
+    break_declined_at: int = -100
     credentials: list[str] = field(default_factory=list)
     log: list[dict] = field(default_factory=list)
 
@@ -91,12 +99,19 @@ class Platform:
 
     # --- teaching loop -------------------------------------------------------------
 
-    def next_decision(self, s: LearnerSession) -> Decision:
+    def next_decision(self, s: LearnerSession, skip_break: bool = False) -> Decision:
         if s.simulated is not None:
             attempts = s.twin.attempts
             probe = attempts[-1].skill if attempts else self.track.topological_order()[0]
             s.twin.observe_state(s.edge.sense(s.simulated, probe, 2))
-        s.pending = s.teacher.act(s.twin, s.edge.active, explore=False)
+        if skip_break:
+            s.break_declined_at = s.twin.step
+        quiet = s.simulated is None and (
+            s.twin.steps_since_break < HUMAN_MIN_QUESTIONS_BETWEEN_BREAKS
+            or s.twin.step - s.break_declined_at < DECLINED_BREAK_COOLDOWN)
+        s.pending = s.teacher.act(s.twin, s.edge.active, explore=False,
+                                  force_continue=skip_break or quiet)
+        s.pending.explanation = explain(s.pending, s.twin)
         return s.pending
 
     def answer(self, s: LearnerSession, item_id: str, choice: int) -> dict:
@@ -106,7 +121,7 @@ class Platform:
         correct = choice == d.item.answer
         delta = s.twin.observe_answer(d.item.id, d.skill, d.difficulty, d.modality, correct)
         entry = {"step": s.twin.step, **d.as_dict(), "correct": correct,
-                 "belief_delta": round(delta, 4)}
+                 "belief_delta": round(delta, 4), "explanation": d.explanation}
         s.log.append(entry)
         s.pending = None
         return {"correct": correct, "answer": d.item.answer, "hint": d.item.hint,
@@ -117,7 +132,8 @@ class Platform:
             s.simulated.rest()
         s.twin.observe_break()
         s.log.append({"step": s.twin.step, "action": "break",
-                      "proposed_action": s.pending.proposed_action if s.pending else ""})
+                      "proposed_action": s.pending.proposed_action if s.pending else "",
+                      "explanation": s.pending.explanation if s.pending else None})
         s.pending = None
 
     def autoplay(self, s: LearnerSession, steps: int) -> list[dict]:
@@ -133,8 +149,8 @@ class Platform:
             outcome = s.simulated.attempt(d.skill, d.difficulty, d.modality)
             choice = d.item.answer if outcome.correct else (d.item.answer + 1) % 4
             r = self.answer(s, d.item.id, choice)
-            out.append({k: r[k] for k in ("step", "skill", "difficulty", "modality",
-                                          "correct", "belief")})
+            out.append({k: r[k] for k in ("step", "action", "skill", "difficulty", "modality",
+                                          "correct", "belief", "explanation")})
         return out
 
     def request_credential(self, s: LearnerSession, skill: str):

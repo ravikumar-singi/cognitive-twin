@@ -24,7 +24,19 @@ flowchart LR
   V --> X[(Proof-of-Capability<br/>ledger)]
 ```
 
-![Dashboard: the twin, the agents' decisions and a verified credential](docs/dashboard.png)
+<p>
+  <img src="docs/dashboard.png" alt="Watching the tutor team teach a demo student, with the learning path and a verified credential" width="72%">
+  <img src="docs/mobile.png" alt="A question on a phone, with large answer buttons" width="24%">
+</p>
+
+### Designed to be easy to use
+
+- **Two clear ways in:** *Learn it myself* (answer questions) or *Watch a demo* (see the tutors teach a simulated student, with play, pause, step and speed).
+- **Plain language everywhere.** Every question has a "Why this question?" in everyday words, and progress reads as "the tutors are 72% sure you know this".
+- **A learning path you can read at a glance:** locked, ready, learning, mastered and credentialed skills, plus what unlocks each one.
+- **Breaks are suggestions,** spaced out and skippable with "Keep going". Nothing nags.
+- **Keyboard friendly** (A–D or 1–4 to answer, Enter for next), screen-reader labels and live regions, large tap targets, works on phones, follows light or dark mode, and respects reduced motion.
+- **The technical detail is optional:** agent decisions, guardian interventions, validators and raw model state sit under "Under the hood".
 
 ## Results in simulation
 
@@ -61,7 +73,7 @@ pip install -e ".[dev]"
 cognitive-twin demo            # one simulated learner, end to end, in the terminal
 cognitive-twin serve           # dashboard at http://127.0.0.1:8000
 cognitive-twin train           # retrain in simulation and print the benchmark
-pytest                         # 24 tests
+pytest                         # 25 tests
 ```
 
 Or with Docker: `docker build -t cognitive-twin . && docker run -p 8000:8000 cognitive-twin`.
