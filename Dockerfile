@@ -8,6 +8,11 @@ RUN pip wheel --wheel-dir /wheels ".[aws,otel]"
 
 FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+# Pick up OS security fixes published after the base image was built (the CI image
+# scan fails on fixable HIGH/CRITICAL findings).
+RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 10001 app && useradd --system --uid 10001 --gid app --no-create-home app
 COPY --from=build /wheels /wheels
 RUN pip install --no-index --find-links /wheels "cognitive-twin[aws,otel]" && rm -rf /wheels
