@@ -13,16 +13,23 @@ class LinUCB:
         self.A = np.stack([np.eye(dim) * ridge for _ in range(n_arms)])
         self.b = np.zeros((n_arms, dim))
         self.pulls = np.zeros(n_arms, dtype=int)
+        self._cache: tuple[np.ndarray, np.ndarray] | None = None
+
+    def _params(self) -> tuple[np.ndarray, np.ndarray]:
+        """Inverses and coefficients, cached until the next update. Serving a fixed
+        policy then costs a few dot products per decision, not matrix inversions."""
+        if self._cache is None:
+            inv = np.linalg.inv(self.A)
+            theta = np.einsum("aij,aj->ai", inv, self.b)
+            self._cache = (inv, theta)
+        return self._cache
 
     def scores(self, contexts: np.ndarray, explore: bool = True) -> np.ndarray:
         """``contexts`` has shape (n_arms, dim): one context vector per arm."""
-        out = np.empty(self.n_arms)
-        for a in range(self.n_arms):
-            A_inv = np.linalg.inv(self.A[a])
-            theta = A_inv @ self.b[a]
-            x = contexts[a]
-            bonus = self.alpha * np.sqrt(x @ A_inv @ x) if explore else 0.0
-            out[a] = theta @ x + bonus
+        inv, theta = self._params()
+        out = np.einsum("ai,ai->a", theta, contexts)
+        if explore:
+            out = out + self.alpha * np.sqrt(np.einsum("ai,aij,aj->a", contexts, inv, contexts))
         return out
 
     def select(self, contexts: np.ndarray, allowed: list[int] | None = None,
@@ -35,6 +42,7 @@ class LinUCB:
         return int(np.argmax(s))
 
     def update(self, arm: int, context: np.ndarray, reward: float) -> None:
+        self._cache = None
         self.A[arm] += np.outer(context, context)
         self.b[arm] += reward * context
         self.pulls[arm] += 1

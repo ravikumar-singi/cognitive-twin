@@ -1,0 +1,21 @@
+# Local production-like stack: PostgreSQL + Redis + the app in development mode.
+#   docker compose up --build    then open http://localhost:8000
+services:
+  db:
+    image: postgres:16
+    environment: {POSTGRES_USER: ct, POSTGRES_PASSWORD: ct, POSTGRES_DB: cognitive_twin}
+    healthcheck: {test: ["CMD", "pg_isready", "-U", "ct"], interval: 5s, retries: 10}
+  redis:
+    image: redis:7
+  app:
+    build: .
+    command: ["cognitive-twin", "serve", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      CT_ENV: development
+      DATABASE_URL: postgresql+psycopg://ct:ct@db:5432/cognitive_twin
+      REDIS_URL: redis://redis:6379/0
+      CT_LOCAL_KEY_DIR: /tmp/keys
+    ports: ["8000:8000"]
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_started}

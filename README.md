@@ -6,6 +6,8 @@ Three cooperating RL agents learn *how to teach* each learner: what to study nex
 
 > Personal research project. Not affiliated with, endorsed by or built for any employer.
 
+**Status: v0.2, phase one (pilot-ready).** The service now persists everything in PostgreSQL, signs credentials with KMS-held keys, signs people in through their institution, enforces consent and data rights, and ships with infrastructure as code, CI/CD, monitoring and runbooks. See [what's production-ready and what still needs a real environment](docs/requirements-traceability.md).
+
 ```mermaid
 flowchart LR
   subgraph Device["Learner device (edge)"]
@@ -69,32 +71,31 @@ The agents share one team objective (knowledge gain) in a hierarchy: curriculum 
 ## Quick start
 
 ```bash
-pip install -e ".[dev]"
-cognitive-twin demo            # one simulated learner, end to end, in the terminal
-cognitive-twin serve           # dashboard at http://127.0.0.1:8000
-cognitive-twin train           # retrain in simulation and print the benchmark
-pytest                         # 25 tests
+docker compose up --build          # PostgreSQL + Redis + the app, at http://localhost:8000
 ```
 
-Or with Docker: `docker build -t cognitive-twin . && docker run -p 8000:8000 cognitive-twin`.
+Or without Docker (SQLite, development mode):
 
-In the dashboard, enrol a learner as **simulated** (watch the agents teach) or **"I'll answer myself"** (you are the learner). Toggle region, age and neural opt-in to see the consent policy switch sensing off.
+```bash
+pip install -e ".[dev]"
+cognitive-twin serve               # http://127.0.0.1:8000
+pytest                             # 88 tests; set TEST_DATABASE_URL to run them on PostgreSQL
+cognitive-twin train               # retrain in simulation and print the benchmark
+```
+
+Development servers offer **development sign-in**: one click to act as a learner, an educator, an administrator, an EU learner or an under-18 learner, so you can see every role and rule. Staging and production refuse it and use the institution's single sign-on.
 
 ## API
 
-| Method | Path | Purpose |
-|---|---|---|
-| `POST` | `/api/learners` | Enrol (name, age, region, neural opt-in, guardian consent, simulated) |
-| `GET` | `/api/learners/{id}` | Twin, agent log, guardian interventions, credentials |
-| `POST` | `/api/learners/{id}/next` | Agents decide the next step (item without its answer key, or a break) |
-| `POST` | `/api/learners/{id}/answer` | Submit a human answer |
-| `POST` | `/api/learners/{id}/break` | Finish a break |
-| `POST` | `/api/learners/{id}/autoplay` | Let a simulated learner run N steps |
-| `POST` | `/api/learners/{id}/credentials` | Ask the validator DAO for a credential |
-| `GET` | `/api/credentials/{id}/verify` | Check signatures, quorum, ledger anchor and chain |
-| `GET` | `/api/ledger` · `/api/policy` | Validators, blocks, learned policy statistics |
+| Who | Routes |
+|---|---|
+| Anyone | `GET /api/public/credentials/{id}/verify`, `GET /api/public/keys`, `GET /healthz`, `GET /readyz` |
+| Sign-in | `GET /auth/login` → institution SSO → `/auth/callback`; `POST /auth/logout`; `GET /auth/session` |
+| Learner (own data only) | `GET /api/me`, `POST /api/me/consent`, `POST /api/me/next`, `POST /api/me/answer`, `POST /api/me/break`, `POST /api/me/credentials`, `GET /api/me/export`, `POST /api/me/delete` |
+| Educator (own cohorts) | `GET /api/educator/cohorts`, `…/cohorts/{id}/learners`, `…/learners/{id}`, `POST …/learners/{id}/credentials`, `POST …/credentials/{id}/revoke` |
+| Administrator | `/api/admin/policies` (upload, activate = roll back), `/api/admin/keys` (rotate), `/api/admin/validators`, `/api/admin/ledger/verify`, `/api/admin/audit` |
 
-Interactive docs are at `/docs`.
+Browser sessions use an HttpOnly cookie plus a CSRF token; API clients can use institution-issued bearer tokens. Interactive docs are at `/docs` on development servers.
 
 ## Privacy and safety by design
 
@@ -110,28 +111,30 @@ More in [`docs/privacy.md`](docs/privacy.md).
 
 ```
 src/cognitive_twin/
-  env/simulator.py     simulated student population (the RL environment)
-  twin.py              Bayesian knowledge tracing belief state
-  edge/sensor.py       neural band + on-device feature extraction
-  consent.py           consent and regional policy
-  rl/agents.py         curriculum, tutor and pacing agents
-  rl/bandit.py         LinUCB
-  rl/shield.py         Guardian safety shield
-  rl/teacher.py        coordinator, baselines, episode runner
-  rl/train.py          training and benchmarking
-  ledger/ledger.py     validator DAO, verifiable credentials, hash chain
-  service.py, api.py   session layer and FastAPI service
-  web/index.html       dashboard
-  content/             skills graph, question bank, trained policy
-docs/                  architecture, RL design, privacy, roadmap
+  app.py, deps.py           application factory, auth dependencies, commit-in-thread routes
+  api/                      auth, learner, educator/admin, public routes
+  auth/                     OIDC client, signed sessions, user provisioning
+  db/                       models, Alembic migrations, append-only triggers, ct_app role
+  learning.py               teaching loop on the database (stateless)
+  ledger/service.py         DB-backed ledger: issuance, revocation, verification
+  keys.py                   KMS and local key providers, key registry and rotation
+  policy_store.py           versioned teaching policies and rollback
+  security.py, observability.py   headers, rate limits, JSON logs, metrics, tracing
+  rl/, env/, twin.py, edge/ the multi-agent RL core and simulator
+  web/                      the web app (strict CSP: no inline scripts)
+deploy/terraform/           AWS: VPC, ALB+WAF, ECS Fargate, RDS, Redis, KMS, backups, alarms
+deploy/observability/       Prometheus alert rules (+ unit tests), Grafana dashboard
+loadtest/                   Locust load test with an SLO gate
+docs/                       production guide, runbooks, compliance, traceability, RL design
 ```
 
-## Honest limits of this MVP
+## Honest limits
 
-- The neural band is simulated; hardware integration is on the roadmap.
-- The ledger is a single-process hash chain, and evidence uses salted hash commitments rather than zero-knowledge proofs.
-- One content track (Machine Learning Foundations, 7 skills, 42 items).
-- Results come from a simulator, not from students. See [`docs/roadmap.md`](docs/roadmap.md) for the path to a randomised pilot.
+- **Not yet deployed.** The infrastructure is written and validated in CI, but staging still needs a first `terraform apply`, a 2,000-learner load test, a restore test and an external penetration test.
+- **Phase-one validators are not independent:** all four validator keys are operated by this service. Phase two gives each organisation its own keys and infrastructure.
+- Evidence uses salted hash commitments, not zero-knowledge proofs.
+- The neural headband is disabled; the simulator is uncalibrated against real learners; there is one content track of 42 items.
+- Teaching results come from simulation, not from students.
 
 ## License
 

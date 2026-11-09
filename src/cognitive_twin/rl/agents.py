@@ -42,6 +42,7 @@ class CurriculumAgent:
         self.current: str | None = None
         self._ctx: np.ndarray | None = None
         self._gains: list[float] = []
+        self._steps = 0  # teaching steps taken in the current option
 
     def context(self, twin: CognitiveTwin) -> np.ndarray:
         rows = []
@@ -52,17 +53,19 @@ class CurriculumAgent:
         return np.array(rows)
 
     def needs_decision(self, twin: CognitiveTwin) -> bool:
-        return (self.current is None or len(self._gains) >= self.OPTION_LENGTH
+        return (self.current is None or self._steps >= self.OPTION_LENGTH
                 or twin.p_known[self.current] >= 0.95)
 
     def act(self, twin: CognitiveTwin, allowed: list[str], explore: bool) -> str:
         if not self.needs_decision(twin) and self.current in allowed:
+            self._steps += 1
             return self.current
         self._close_option()
         ctx = self.context(twin)
         idx = [self.skills.index(s) for s in allowed]
         arm = self.model.select(ctx, idx, explore)
         self.current, self._ctx = self.skills[arm], ctx[arm]
+        self._steps = 1
         return self.current
 
     def record(self, gain: float) -> None:
@@ -76,7 +79,7 @@ class CurriculumAgent:
 
     def end_episode(self) -> None:
         self._close_option()
-        self.current, self._ctx = None, None
+        self.current, self._ctx, self._steps = None, None, 0
 
 
 class TutorAgent:
