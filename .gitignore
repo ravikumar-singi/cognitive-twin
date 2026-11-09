@@ -13,3 +13,8 @@ htmlcov/
 .env
 /policy.json
 .DS_Store
+dump.rdb
+*.db-wal
+*.db-shm
+.keys/
+results*.csv

@@ -1,5 +1,7 @@
 # Architecture
 
+> For the deployed production architecture (AWS, PostgreSQL, KMS, SSO, monitoring), see [production.md](production.md). This page describes the learning system's logical layers.
+
 Six layers around one learner model. Privacy narrows at each boundary: raw signals stay on the device, features feed the twin, and only answer evidence reaches the ledger.
 
 | Layer | MVP module | Production direction |

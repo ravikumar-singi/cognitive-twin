@@ -1,0 +1,45 @@
+# promtool test rules alerts_test.yml
+rule_files: [alerts.yml]
+evaluation_interval: 1m
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'ct_ledger_chain_ok{instance="a"}'
+        values: '1 1 0 0'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: CTLedgerChainBroken
+        exp_alerts: []
+      - eval_time: 3m
+        alertname: CTLedgerChainBroken
+        exp_alerts:
+          - exp_labels: {severity: page}
+            exp_annotations:
+              summary: "The credential ledger failed hash-chain verification"
+              runbook: docs/runbooks/ledger-chain-broken.md
+  - interval: 1m
+    input_series:
+      - series: 'ct_http_requests_total{route="/api/me/next",status="200",method="POST"}'
+        values: '0+100x30'
+      - series: 'ct_http_requests_total{route="/api/me/next",status="500",method="POST"}'
+        values: '0+5x30'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: CTHighErrorRate
+        exp_alerts:
+          - exp_labels: {severity: page}
+            exp_annotations:
+              summary: "More than 2% of requests are failing"
+              runbook: docs/runbooks/incident-response.md
+  - interval: 1m
+    input_series:
+      - series: 'ct_key_service_errors_total{operation="sign"}'
+        values: '0 0 1 2 3 4 5 6 7 8 9 10'
+    alert_rule_test:
+      - eval_time: 11m
+        alertname: CTKeyServiceFailures
+        exp_alerts:
+          - exp_labels: {severity: page}
+            exp_annotations:
+              summary: "Signing with KMS is failing; credentials cannot be issued"
+              runbook: docs/runbooks/key-management.md

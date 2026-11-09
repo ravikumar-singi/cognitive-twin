@@ -1,0 +1,56 @@
+name: Release to one environment
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        type: string
+        required: true
+      image:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env }}
+    defaults:
+      run:
+        working-directory: deploy/terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - run: terraform init -backend-config=envs/${{ inputs.env }}.backend.hcl
+      - name: Plan and apply infrastructure plus the new task definitions
+        run: |
+          terraform apply -auto-approve -input=false \
+            -var-file=envs/${{ inputs.env }}.tfvars -var image=${{ inputs.image }}
+      - name: Run database migrations (one-off task) before the service rolls
+        run: |
+          set -euo pipefail
+          CLUSTER=$(terraform output -raw cluster)
+          TASK=$(aws ecs run-task --cluster "$CLUSTER" --launch-type FARGATE \
+            --task-definition "$(terraform output -raw migrate_task_definition)" \
+            --network-configuration "awsvpcConfiguration={subnets=[$(terraform output -json private_subnets | jq -r 'join(",")')],securityGroups=[$(terraform output -raw app_security_group)],assignPublicIp=DISABLED}" \
+            --query 'tasks[0].taskArn' --output text)
+          aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks "$TASK"
+          CODE=$(aws ecs describe-tasks --cluster "$CLUSTER" --tasks "$TASK" --query 'tasks[0].containers[0].exitCode' --output text)
+          test "$CODE" = "0" || { echo "migration failed with exit code $CODE"; exit 1; }
+      - name: Wait for the service to become stable (circuit breaker rolls back on failure)
+        run: aws ecs wait services-stable --cluster "$(terraform output -raw cluster)" --services "$(terraform output -raw service)"
+      - name: Smoke test
+        run: |
+          set -euo pipefail
+          URL=$(terraform output -raw url)
+          curl -fsS "$URL/healthz"
+          curl -fsS "$URL/readyz" | tee /dev/stderr | jq -e '.ready == true'
+          curl -fsS -o /dev/null -w '%{http_code}\n' "$URL/api/me" | grep -q 401
+          test "$(curl -s -o /dev/null -w '%{http_code}' "$URL/metrics")" = "404"

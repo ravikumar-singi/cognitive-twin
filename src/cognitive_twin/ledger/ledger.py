@@ -1,4 +1,9 @@
-"""Proof-of-Capability ledger with a validator DAO.
+"""Proof-of-Capability evidence rules, plus the in-memory ledger used in simulation.
+
+The production, database-backed ledger is ``ledger/service.py``; it reuses the
+evidence and rubric logic defined here.
+
+Proof-of-Capability ledger with a validator DAO.
 
 A credential is minted only when validators holding at least two thirds of
 total stake independently review the evidence and sign it. Validators that
@@ -56,13 +61,15 @@ class Evidence:
     salt: str = field(default_factory=lambda: secrets.token_hex(16))
 
     @classmethod
-    def from_twin(cls, twin: CognitiveTwin, skill: str, window: int = 6) -> Evidence:
+    def from_twin(cls, twin: CognitiveTwin, skill: str, window: int = 6,
+                  subject: str | None = None) -> Evidence:
         attempts = [
             {"item_id": a.item_id, "difficulty": a.difficulty, "correct": a.correct,
              "step": a.step}
             for a in twin.recent_for(skill, window)
         ]
-        ev = cls(learner_did(twin.learner_id), skill, attempts, round(twin.p_known[skill], 4))
+        ev = cls(subject or learner_did(twin.learner_id), skill, attempts,
+                 round(twin.p_known[skill], 4))
         ev.assert_no_neural_data()
         return ev
 

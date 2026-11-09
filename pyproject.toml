@@ -4,22 +4,35 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cognitive-twin"
-version = "0.1.0"
+version = "0.2.0"
 description = "Cognition-native learning platform: agentic tutors, an edge-only neural sensing pipeline and a validator-signed Proof-of-Capability ledger."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.110",
-  "uvicorn>=0.29",
+  "uvicorn[standard]>=0.29",
   "pydantic>=2.6",
   "cryptography>=42",
   "httpx>=0.27",
   "numpy>=1.26",
+  "sqlalchemy>=2.0.30",
+  "alembic>=1.13",
+  "psycopg[binary]>=3.1",
+  "pyjwt[crypto]>=2.8",
+  "redis>=5.0",
+  "prometheus-client>=0.20",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.4"]
+aws = ["boto3>=1.34"]
+otel = [
+  "opentelemetry-sdk>=1.24",
+  "opentelemetry-exporter-otlp-proto-http>=1.24",
+  "opentelemetry-instrumentation-fastapi>=0.45b0",
+  "opentelemetry-instrumentation-sqlalchemy>=0.45b0",
+]
+dev = ["pytest>=8", "ruff>=0.4", "locust>=2.24", "pip-audit>=2.7", "bandit>=1.7"]
 
 [project.scripts]
 cognitive-twin = "cognitive_twin.cli:main"
@@ -28,7 +41,7 @@ cognitive-twin = "cognitive_twin.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-cognitive_twin = ["web/*.html", "content/*.json"]
+cognitive_twin = ["web/*.html", "web/*.js", "web/*.css", "content/*.json", "db/migrations/*.mako", "db/migrations/versions/*.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -39,4 +52,18 @@ line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP"]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["S101"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+
+[tool.ruff.lint.isort]
+known-local-folder = ["conftest"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/cognitive_twin/db/migrations/versions/*" = ["E501"]
+"tests/*" = ["S"]
+"src/cognitive_twin/env/*" = ["S311"]
+"src/cognitive_twin/rl/*" = ["S311"]
+"loadtest/*" = ["S311"]

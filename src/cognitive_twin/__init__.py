@@ -8,4 +8,11 @@ Three pillars on one learner model:
      (``cognitive_twin.ledger``)
 """
 
-__version__ = "0.1.0"
+import os as _os
+
+# One BLAS thread per request: the service already runs requests in parallel, and
+# nested BLAS threads oversubscribe the CPU badly under load.
+for _var in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+    _os.environ.setdefault(_var, "1")
+
+__version__ = "0.2.0"

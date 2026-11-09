@@ -1,0 +1,53 @@
+name: Deploy
+
+# Every change goes to staging first (R5.4). Production needs the staging job to pass
+# and a required reviewer on the "production" GitHub environment.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write   # GitHub OIDC to AWS: no long-lived AWS keys in the repository
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: staging
+    outputs:
+      image: ${{ steps.push.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - id: push
+        run: |
+          IMAGE="${{ steps.ecr.outputs.registry }}/cognitive-twin:${GITHUB_SHA::12}"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+  staging:
+    needs: build
+    uses: ./.github/workflows/release.yml
+    with:
+      env: staging
+      image: ${{ needs.build.outputs.image }}
+    secrets: inherit
+
+  production:
+    needs: [build, staging]
+    uses: ./.github/workflows/release.yml
+    with:
+      env: production
+      image: ${{ needs.build.outputs.image }}
+    secrets: inherit
