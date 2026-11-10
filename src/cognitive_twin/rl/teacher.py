@@ -103,6 +103,7 @@ class MultiAgentTeacher:
 
     def save(self, path: str | Path) -> None:
         Path(path).write_text(json.dumps({
+            "track": self.track.id,
             "curriculum": self.curriculum.model.to_dict(),
             "curriculum_skills": self.curriculum.skills,
             "tutor": self.tutor.model.to_dict(),

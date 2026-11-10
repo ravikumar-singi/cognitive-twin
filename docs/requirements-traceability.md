@@ -40,12 +40,24 @@ Source: [Cognitive Twin: Phase One Production Requirements](https://claude.ai/ar
 
 | Req | Status | Implementation | Evidence |
 |---|---|---|---|
-| R4.1 Adults only, from institution records | ✅ | `adult_from_claims`: verified flag or birthdate claim only; nothing self-declared | `test_minors_are_not_eligible`, `test_minor_by_institution_birthdate_is_not_eligible`, `test_adulthood_rules` |
+| R4.1 Age from school records; under-18s need school-confirmed guardian consent; school minimum age (v0.3, replaces "adults only") | ✅ | `age_band_from_claims`, teacher approval, `not_eligible_reason`; append-only `guardian` consent records | `test_full_school_journey_for_a_young_learner`, `test_minor_without_guardian_consent_waits`, `test_school_can_set_a_stricter_age_limit`, `test_age_groups_and_guardian_consent_come_from_school_claims` |
 | R4.2 Versioned, timestamped, append-only consent | ✅ | `consent_records` table (append-only), policy version and text hash | `test_consent_is_versioned_and_never_overwritten`, `test_new_policy_version_requires_renewed_consent` |
 | R4.3 Headband disabled; sensing consent stored separately | ✅ | Separate `neural_sensing` scope; `CT_NEURAL_ENABLED` refused at boot | `test_neural_consent_is_stored_but_sensing_stays_off` |
 | R4.4 Region from institution records drives regional rules | ✅ | `ct_region` claim required; EU disables affect inference | `test_region_must_come_from_the_institution`, `test_region_comes_from_the_institution_and_drives_rules` |
 | R4.5 Export and deletion; ledger keeps only unlinkable data | ✅ | `/api/me/export`, `/api/me/delete`; random DIDs | `test_export_contains_my_data`, `test_deletion_removes_personal_data_but_keeps_unlinkable_credentials` |
 | R4.6 DPIA signed off by partner | ⬜ | [DPIA draft](compliance/dpia-template.md) with the technical sections filled in | Partner to complete and sign |
+
+## R6. Schools, ages and subjects (v0.3)
+
+| Req | Status | Implementation | Evidence |
+|---|---|---|---|
+| R6.1 Several subjects, each with its own trained policy and separate progress | ✅ | 5 subject files, `content/policies/*`, per-subject twins and policy activations; bundled policies activate on first start | `test_subjects_are_separate_and_schools_choose_them`, `test_policy_versions_are_recorded_and_revertible`; [benchmarks](benchmarks/) |
+| R6.2 Schools without SSO: class codes, usernames, staff invitations | ✅ | `schools.py`; `/auth/join`, `/auth/local-login`, `/auth/invite`, `/auth/password` | `test_full_school_journey_for_a_young_learner`, `test_join_codes_can_be_turned_off_and_invites_are_single_use` |
+| R6.3 Password safety: hashing, lockout, reset signs out, forced change of temporary passwords | ✅ | scrypt; 5 tries / 15 min; session epoch; `must_change` gate; sign-in paths rate-limited per IP | `test_lockout_after_repeated_wrong_passwords`, `test_teacher_adds_students_and_resets_passwords` |
+| R6.4 School isolation: teachers see their classes, school admins their school | ✅ | `educator_can_see`, `_cohort_or_404`, 404 outside scope | `test_schools_and_classes_are_isolated` |
+| R6.5 Child protections: minimal data for under-13s, shorter break limits, no headband, deletion via school | ✅ | See [children's data](compliance/children.md) | `test_full_school_journey_for_a_young_learner`, `test_sso_personas_cover_children` |
+| R6.6 Legal review of children's data per country; teacher review of question content | ⬜ | [Checklist](compliance/children.md#before-children-use-it-checklist) | Operator, schools and counsel |
+| R6.7 Upgrade keeps existing pilot data | ✅ | Migration `0002` with backfill | Migration run against seeded v0.2 data on PostgreSQL; schema drift test |
 
 ## R5. Operations
 
@@ -64,6 +76,7 @@ Source: [Cognitive Twin: Phase One Production Requirements](https://claude.ai/ar
 |---|---|
 | Every requirement met in staging | 🟡 Code complete; needs the first staging deploy |
 | Restart-and-rotate credential test passes | ✅ Automated (R2.5) |
-| Penetration test, no open highs | ⬜ To be commissioned |
+| Penetration test, no open highs | ⬜ To be commissioned (scope now includes class codes and passwords) |
+| Children's data reviewed by counsel for each country; DPAs with schools | ⬜ Operator and school action |
 | DPIA signed off | ⬜ Partner action |
 | Partner approves the pilot plan | ⬜ Partner action |

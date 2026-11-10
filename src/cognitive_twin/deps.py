@@ -18,13 +18,14 @@ from sqlalchemy.orm import Session, sessionmaker
 from .auth.oidc import OIDCClient, OIDCError
 from .auth.tokens import TokenError, unsign
 from .config import Settings
-from .db.models import CohortMember, User
+from .db.models import Cohort, CohortMember, LocalCredential, School, User
 from .keys import KeyProvider, KeyRegistry
 from .learning import Ctx, LearningService
 from .observability import user_id_var
 from .policy_store import PolicyCache
+from .schools import allowed_tracks
 from .security import RateLimiter
-from .skills import Track
+from .skills import DEFAULT_TRACK, Track
 
 SESSION_COOKIE = "ct_session"
 UNSAFE = {"POST", "PUT", "PATCH", "DELETE"}
@@ -35,7 +36,7 @@ class AppState:
     settings: Settings
     engine: Engine
     sessions: sessionmaker[Session]
-    track: Track
+    tracks: dict[str, Track]
     policies: PolicyCache
     key_provider: KeyProvider
     limiter: RateLimiter
@@ -117,10 +118,35 @@ async def get_db(request: Request) -> AsyncIterator[Session]:
 DB = Depends(get_db, scope="function")
 
 
+def default_track(db: Session, user: User | None, tracks: dict[str, Track]) -> str:
+    """The subject to open when none is asked for: the learner's class, else the first one
+    their school offers."""
+    if user is None:
+        return DEFAULT_TRACK
+    school = db.get(School, user.school_id) if user.school_id else None
+    allowed = allowed_tracks(school, tracks)
+    cls = db.scalar(select(Cohort.track_id).join(CohortMember, CohortMember.cohort_id == Cohort.id)
+                    .where(CohortMember.user_id == user.id, Cohort.track_id.is_not(None))
+                    .order_by(Cohort.created_at).limit(1))
+    if cls in allowed:
+        return cls
+    return DEFAULT_TRACK if DEFAULT_TRACK in allowed else (allowed or [DEFAULT_TRACK])[0]
+
+
 def service(request: Request, db: Session = DB) -> LearningService:
+    """Learning service for one subject, from ``?track=`` (or the user's default)."""
     st = state(request)
-    return LearningService(db, st.settings, st.policies, st.track,
+    track_id = request.query_params.get("track") or default_track(
+        db, getattr(request.state, "user", None), st.tracks)
+    track = st.tracks.get(track_id)
+    if track is None:
+        raise HTTPException(404, "unknown subject")
+    return LearningService(db, st.settings, st.policies, track,
                            KeyRegistry(db, st.key_provider))
+
+
+# Signed-in people who still have a temporary password may only do this much.
+PASSWORD_CHANGE_PATHS = frozenset({"/auth/password", "/auth/logout", "/auth/session"})
 
 
 def _bearer_user(request: Request, db: Session, st: AppState) -> User | None:
@@ -155,6 +181,13 @@ def current_user(request: Request, db: Session = DB) -> User:
         user = db.get(User, payload.get("uid"))
         if user is None:
             raise HTTPException(401, "please sign in")
+        cred = db.get(LocalCredential, user.id)
+        if cred is not None:
+            if payload.get("se", 0) != cred.session_epoch:
+                raise HTTPException(401, "your password was changed; please sign in again")
+            if cred.must_change and request.url.path not in PASSWORD_CHANGE_PATHS:
+                raise HTTPException(403, "please choose a new password first",
+                                    headers={"X-CT-Code": "password_change_required"})
         if request.method in UNSAFE and request.headers.get("x-csrf-token") != payload["csrf"]:
             raise HTTPException(403, "missing or invalid CSRF token")
         request.state.auth = "cookie"
@@ -188,8 +221,13 @@ def ctx(request: Request) -> Ctx:
 
 
 def educator_can_see(db: Session, educator: User, learner_id: str) -> bool:
+    """Platform admins see everyone; school admins their school; teachers their classes."""
     if educator.role == "admin":
         return True
+    if educator.role == "school_admin":
+        learner = db.get(User, learner_id)
+        return (learner is not None and educator.school_id is not None
+                and learner.school_id == educator.school_id)
     if educator.role != "educator":
         return False
     mine = select(CohortMember.cohort_id).where(CohortMember.user_id == educator.id,

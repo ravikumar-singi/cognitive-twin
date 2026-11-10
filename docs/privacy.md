@@ -23,8 +23,8 @@ Neural features can change *how* someone is taught, but never *whether* they're 
 
 ## Children's and student data
 
-Deployments involving minors need COPPA and FERPA review in the US, and the DPDP Act in India, among others. The defaults above (sensing off under 16, guardian consent) are a starting point, not compliance.
+Since v0.3 the service supports learners of every age. Age groups and guardian consent come from school records, under-13s keep only a first name, and schools handle deletion for children. The design, the legal background (COPPA, the DPDP Act and Rules 2025, UK and EU GDPR) and the checklist to complete before children use it are in [`compliance/children.md`](compliance/children.md). It is a starting point for counsel, not a compliance certificate.
 
 ## Pseudonymity
 
-Credentials name the learner by a DID derived from a hash of their internal id. Names never appear on the ledger.
+Credentials name the learner by a random pseudonymous DID, so nothing links them to the person once their account is deleted. Names never appear on the ledger.

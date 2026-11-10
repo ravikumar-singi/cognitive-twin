@@ -1,0 +1,561 @@
+{
+ "id": "high-school-algebra",
+ "name": "High-school algebra",
+ "audience": "Ages 14 to 16",
+ "description": "Expressions, equations, inequalities, straight-line graphs, simultaneous equations and quadratics.",
+ "skills": [
+  {
+   "id": "alg-expressions",
+   "name": "Algebraic expressions",
+   "prereqs": [],
+   "rubric": "Simplifies, expands, factorises and evaluates expressions"
+  },
+  {
+   "id": "alg-linear",
+   "name": "Linear equations",
+   "prereqs": [
+    "alg-expressions"
+   ],
+   "rubric": "Solves linear equations including brackets and unknowns on both sides"
+  },
+  {
+   "id": "alg-inequalities",
+   "name": "Inequalities",
+   "prereqs": [
+    "alg-linear"
+   ],
+   "rubric": "Solves linear inequalities, including those that reverse the sign"
+  },
+  {
+   "id": "alg-graphs",
+   "name": "Straight-line graphs",
+   "prereqs": [
+    "alg-linear"
+   ],
+   "rubric": "Finds and interprets gradients, intercepts and equations of lines"
+  },
+  {
+   "id": "alg-simultaneous",
+   "name": "Simultaneous equations",
+   "prereqs": [
+    "alg-linear"
+   ],
+   "rubric": "Solves pairs of linear equations by substitution and elimination"
+  },
+  {
+   "id": "alg-quadratics",
+   "name": "Quadratics",
+   "prereqs": [
+    "alg-expressions",
+    "alg-linear"
+   ],
+   "rubric": "Factorises and solves quadratic equations"
+  }
+ ],
+ "items": [
+  {
+   "id": "alg-expressions-1",
+   "skill": "alg-expressions",
+   "difficulty": 1,
+   "prompt": "Simplify 3x + 4x.",
+   "options": [
+    "7x",
+    "12x",
+    "7x²",
+    "34x"
+   ],
+   "answer": 0,
+   "hint": "Add the numbers in front of x."
+  },
+  {
+   "id": "alg-expressions-2",
+   "skill": "alg-expressions",
+   "difficulty": 1,
+   "prompt": "What is the value of 2a + 1 when a = 4?",
+   "options": [
+    "7",
+    "25",
+    "9",
+    "8"
+   ],
+   "answer": 2,
+   "hint": "Replace a with 4, then multiply before adding."
+  },
+  {
+   "id": "alg-expressions-3",
+   "skill": "alg-expressions",
+   "difficulty": 2,
+   "prompt": "Expand 3(x + 4).",
+   "options": [
+    "3x + 4",
+    "3x + 12",
+    "x + 12",
+    "7x"
+   ],
+   "answer": 1,
+   "hint": "Multiply both terms inside the bracket by 3."
+  },
+  {
+   "id": "alg-expressions-4",
+   "skill": "alg-expressions",
+   "difficulty": 2,
+   "prompt": "Simplify 5a + 2b - 3a + b.",
+   "options": [
+    "2a + 3b",
+    "8a + 3b",
+    "2a + b",
+    "5ab"
+   ],
+   "answer": 0,
+   "hint": "Collect the a terms and the b terms separately."
+  },
+  {
+   "id": "alg-expressions-5",
+   "skill": "alg-expressions",
+   "difficulty": 3,
+   "prompt": "Expand and simplify (x + 2)(x + 5).",
+   "options": [
+    "x² + 10",
+    "x² + 7x + 7",
+    "2x + 7",
+    "x² + 7x + 10"
+   ],
+   "answer": 3,
+   "hint": "Multiply each term in the first bracket by each term in the second."
+  },
+  {
+   "id": "alg-expressions-6",
+   "skill": "alg-expressions",
+   "difficulty": 3,
+   "prompt": "Factorise 6x + 9.",
+   "options": [
+    "6(x + 9)",
+    "3(2x + 9)",
+    "3(2x + 3)",
+    "9(x + 1)"
+   ],
+   "answer": 2,
+   "hint": "Find the largest number that divides both 6 and 9."
+  },
+  {
+   "id": "alg-linear-1",
+   "skill": "alg-linear",
+   "difficulty": 1,
+   "prompt": "Solve x - 9 = 4.",
+   "options": [
+    "5",
+    "13",
+    "-5",
+    "36"
+   ],
+   "answer": 1,
+   "hint": "Add 9 to both sides."
+  },
+  {
+   "id": "alg-linear-2",
+   "skill": "alg-linear",
+   "difficulty": 1,
+   "prompt": "Solve 4x = 28.",
+   "options": [
+    "24",
+    "32",
+    "112",
+    "7"
+   ],
+   "answer": 3,
+   "hint": "Divide both sides by 4."
+  },
+  {
+   "id": "alg-linear-3",
+   "skill": "alg-linear",
+   "difficulty": 2,
+   "prompt": "Solve 3x + 5 = 20.",
+   "options": [
+    "5",
+    "8.3",
+    "15",
+    "45"
+   ],
+   "answer": 0,
+   "hint": "Subtract 5, then divide by 3."
+  },
+  {
+   "id": "alg-linear-4",
+   "skill": "alg-linear",
+   "difficulty": 2,
+   "prompt": "Solve 7 - 2x = 1.",
+   "options": [
+    "4",
+    "-3",
+    "3",
+    "-4"
+   ],
+   "answer": 2,
+   "hint": "Subtract 7 from both sides, then divide by -2."
+  },
+  {
+   "id": "alg-linear-5",
+   "skill": "alg-linear",
+   "difficulty": 3,
+   "prompt": "Solve 4(x - 1) = 2x + 10.",
+   "options": [
+    "3",
+    "5.5",
+    "7",
+    "14"
+   ],
+   "answer": 2,
+   "hint": "Expand the bracket, then collect x terms on one side."
+  },
+  {
+   "id": "alg-linear-6",
+   "skill": "alg-linear",
+   "difficulty": 3,
+   "prompt": "Solve (x + 3)/2 = 5.",
+   "options": [
+    "7",
+    "13",
+    "4",
+    "1"
+   ],
+   "answer": 0,
+   "hint": "Multiply both sides by 2 first."
+  },
+  {
+   "id": "alg-inequalities-1",
+   "skill": "alg-inequalities",
+   "difficulty": 1,
+   "prompt": "Which value of x satisfies x > 3?",
+   "options": [
+    "3",
+    "5",
+    "0",
+    "-4"
+   ],
+   "answer": 1,
+   "hint": "x must be strictly greater than 3."
+  },
+  {
+   "id": "alg-inequalities-2",
+   "skill": "alg-inequalities",
+   "difficulty": 1,
+   "prompt": "Solve x + 2 < 6.",
+   "options": [
+    "x < 4",
+    "x < 8",
+    "x > 4",
+    "x < 3"
+   ],
+   "answer": 0,
+   "hint": "Subtract 2 from both sides."
+  },
+  {
+   "id": "alg-inequalities-3",
+   "skill": "alg-inequalities",
+   "difficulty": 2,
+   "prompt": "Solve 2x - 1 ≥ 7.",
+   "options": [
+    "x ≥ 3",
+    "x ≤ 4",
+    "x ≥ 4",
+    "x ≥ 8"
+   ],
+   "answer": 2,
+   "hint": "Add 1, then divide by 2."
+  },
+  {
+   "id": "alg-inequalities-4",
+   "skill": "alg-inequalities",
+   "difficulty": 2,
+   "prompt": "How many whole numbers satisfy 2 < x ≤ 6?",
+   "options": [
+    "3",
+    "5",
+    "6",
+    "4"
+   ],
+   "answer": 3,
+   "hint": "List them: 2 is not included but 6 is."
+  },
+  {
+   "id": "alg-inequalities-5",
+   "skill": "alg-inequalities",
+   "difficulty": 3,
+   "prompt": "Solve -3x < 12.",
+   "options": [
+    "x < -4",
+    "x > -4",
+    "x > 4",
+    "x < 4"
+   ],
+   "answer": 1,
+   "hint": "Dividing by a negative number reverses the inequality sign."
+  },
+  {
+   "id": "alg-inequalities-6",
+   "skill": "alg-inequalities",
+   "difficulty": 3,
+   "prompt": "Solve 5 - 2x ≥ 11.",
+   "options": [
+    "x ≤ -3",
+    "x ≥ -3",
+    "x ≤ 3",
+    "x ≥ 8"
+   ],
+   "answer": 0,
+   "hint": "Subtract 5, then divide by -2 and reverse the sign."
+  },
+  {
+   "id": "alg-graphs-1",
+   "skill": "alg-graphs",
+   "difficulty": 1,
+   "prompt": "What is the gradient (slope) of the line y = 3x + 2?",
+   "options": [
+    "2",
+    "5",
+    "3",
+    "3x"
+   ],
+   "answer": 2,
+   "hint": "In y = mx + c, the gradient is m."
+  },
+  {
+   "id": "alg-graphs-2",
+   "skill": "alg-graphs",
+   "difficulty": 1,
+   "prompt": "Where does the line y = 2x + 5 cross the y-axis?",
+   "options": [
+    "(0, 5)",
+    "(5, 0)",
+    "(0, 2)",
+    "(2, 5)"
+   ],
+   "answer": 0,
+   "hint": "Put x = 0."
+  },
+  {
+   "id": "alg-graphs-3",
+   "skill": "alg-graphs",
+   "difficulty": 2,
+   "prompt": "What is the gradient of the line through (1, 2) and (3, 8)?",
+   "options": [
+    "2",
+    "3",
+    "6",
+    "1/3"
+   ],
+   "answer": 1,
+   "hint": "Change in y divided by change in x."
+  },
+  {
+   "id": "alg-graphs-4",
+   "skill": "alg-graphs",
+   "difficulty": 2,
+   "prompt": "Which point lies on the line y = 2x - 1?",
+   "options": [
+    "(1, 3)",
+    "(2, 5)",
+    "(0, 1)",
+    "(3, 5)"
+   ],
+   "answer": 3,
+   "hint": "Substitute each x and check the y value."
+  },
+  {
+   "id": "alg-graphs-5",
+   "skill": "alg-graphs",
+   "difficulty": 3,
+   "prompt": "What is the equation of the line with gradient 2 that passes through (1, 5)?",
+   "options": [
+    "y = 2x + 5",
+    "y = 2x + 3",
+    "y = 5x + 2",
+    "y = 2x - 3"
+   ],
+   "answer": 1,
+   "hint": "Use y = 2x + c and substitute the point to find c."
+  },
+  {
+   "id": "alg-graphs-6",
+   "skill": "alg-graphs",
+   "difficulty": 3,
+   "prompt": "Which line is parallel to y = 4x - 1?",
+   "options": [
+    "y = -4x + 1",
+    "y = x/4 + 2",
+    "y = 4x + 7",
+    "y = -x/4"
+   ],
+   "answer": 2,
+   "hint": "Parallel lines have the same gradient."
+  },
+  {
+   "id": "alg-simultaneous-1",
+   "skill": "alg-simultaneous",
+   "difficulty": 1,
+   "prompt": "If x + y = 10 and x = 4, what is y?",
+   "options": [
+    "14",
+    "6",
+    "40",
+    "2.5"
+   ],
+   "answer": 1,
+   "hint": "Substitute x = 4 into the first equation."
+  },
+  {
+   "id": "alg-simultaneous-2",
+   "skill": "alg-simultaneous",
+   "difficulty": 1,
+   "prompt": "If y = 2x and x = 3, what is y?",
+   "options": [
+    "5",
+    "1.5",
+    "6",
+    "9"
+   ],
+   "answer": 2,
+   "hint": "Substitute x = 3."
+  },
+  {
+   "id": "alg-simultaneous-3",
+   "skill": "alg-simultaneous",
+   "difficulty": 2,
+   "prompt": "Solve x + y = 7 and x - y = 3. What is x?",
+   "options": [
+    "5",
+    "2",
+    "4",
+    "10"
+   ],
+   "answer": 0,
+   "hint": "Add the two equations to eliminate y."
+  },
+  {
+   "id": "alg-simultaneous-4",
+   "skill": "alg-simultaneous",
+   "difficulty": 2,
+   "prompt": "Solve y = x + 1 and x + y = 9. What is x?",
+   "options": [
+    "5",
+    "3",
+    "8",
+    "4"
+   ],
+   "answer": 3,
+   "hint": "Substitute y = x + 1 into the second equation."
+  },
+  {
+   "id": "alg-simultaneous-5",
+   "skill": "alg-simultaneous",
+   "difficulty": 3,
+   "prompt": "Solve 2x + y = 11 and x - y = 1. What is y?",
+   "options": [
+    "4",
+    "3",
+    "7",
+    "1"
+   ],
+   "answer": 1,
+   "hint": "Add the equations to find x, then substitute back."
+  },
+  {
+   "id": "alg-simultaneous-6",
+   "skill": "alg-simultaneous",
+   "difficulty": 3,
+   "prompt": "Solve 3x + 2y = 16 and x + 2y = 8. What is x?",
+   "options": [
+    "2",
+    "8",
+    "4",
+    "6"
+   ],
+   "answer": 2,
+   "hint": "Subtract the second equation from the first."
+  },
+  {
+   "id": "alg-quadratics-1",
+   "skill": "alg-quadratics",
+   "difficulty": 1,
+   "prompt": "What is x² when x = -3?",
+   "options": [
+    "-9",
+    "-6",
+    "6",
+    "9"
+   ],
+   "answer": 3,
+   "hint": "A negative number squared is positive."
+  },
+  {
+   "id": "alg-quadratics-2",
+   "skill": "alg-quadratics",
+   "difficulty": 1,
+   "prompt": "Which of these is a quadratic expression?",
+   "options": [
+    "x² + 3x + 1",
+    "3x + 1",
+    "x³ - 2",
+    "1/x"
+   ],
+   "answer": 0,
+   "hint": "The highest power of x must be 2."
+  },
+  {
+   "id": "alg-quadratics-3",
+   "skill": "alg-quadratics",
+   "difficulty": 2,
+   "prompt": "Factorise x² + 5x + 6.",
+   "options": [
+    "(x + 1)(x + 6)",
+    "(x + 2)(x + 3)",
+    "(x + 5)(x + 1)",
+    "(x - 2)(x - 3)"
+   ],
+   "answer": 1,
+   "hint": "Find two numbers that multiply to 6 and add to 5."
+  },
+  {
+   "id": "alg-quadratics-4",
+   "skill": "alg-quadratics",
+   "difficulty": 2,
+   "prompt": "Solve x² = 49.",
+   "options": [
+    "x = 7 only",
+    "x = 24.5",
+    "x = 7 or x = -7",
+    "x = -7 only"
+   ],
+   "answer": 2,
+   "hint": "Remember both the positive and the negative square root."
+  },
+  {
+   "id": "alg-quadratics-5",
+   "skill": "alg-quadratics",
+   "difficulty": 3,
+   "prompt": "Solve x² - 5x + 6 = 0.",
+   "options": [
+    "x = 2 or x = 3",
+    "x = -2 or x = -3",
+    "x = 1 or x = 6",
+    "x = -1 or x = 6"
+   ],
+   "answer": 0,
+   "hint": "Factorise into (x - 2)(x - 3)."
+  },
+  {
+   "id": "alg-quadratics-6",
+   "skill": "alg-quadratics",
+   "difficulty": 3,
+   "prompt": "Solve x² + 2x - 8 = 0.",
+   "options": [
+    "x = 4 or x = -2",
+    "x = 8 or x = -1",
+    "x = -8 or x = 1",
+    "x = -4 or x = 2"
+   ],
+   "answer": 3,
+   "hint": "Factorise into (x + 4)(x - 2)."
+  }
+ ]
+}

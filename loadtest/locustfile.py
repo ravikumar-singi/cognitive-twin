@@ -23,7 +23,8 @@ from locust import HttpUser, between, events, task
 
 from cognitive_twin.skills import load_track
 
-TRACK = load_track()
+TRACK = load_track(os.environ.get("LT_TRACK", "ml-foundations"))
+Q = f"?track={TRACK.id}"  # as the web app sends it
 _ids = itertools.count(1)
 TOKENS = [t.strip() for t in open(os.environ["LT_TOKENS_FILE"])] if os.environ.get(
     "LT_TOKENS_FILE") else []
@@ -47,11 +48,12 @@ class Learner(HttpUser):
             r = self.client.post("/auth/dev-login", json={"persona": f"loadtest-{n}"},
                                  name="/auth/dev-login")
             self.headers["X-CSRF-Token"] = r.headers.get("x-csrf-token", "")
-        self.client.post("/api/me/consent", json={"learning": True}, headers=self.headers)
+        self.client.post("/api/me/consent" + Q, json={"learning": True}, headers=self.headers,
+                         name="/api/me/consent")
 
     @task(10)
     def learn(self):
-        with self.client.post("/api/me/next", json={}, headers=self.headers,
+        with self.client.post("/api/me/next" + Q, json={}, headers=self.headers,
                               name="/api/me/next", catch_response=True) as r:
             if r.status_code != 200:
                 r.failure(f"next {r.status_code}")
@@ -59,16 +61,16 @@ class Learner(HttpUser):
             d = r.json()
         if d["action"] == "break":
             if d.get("proposed_action") != "done":
-                self.client.post("/api/me/break", headers=self.headers)
+                self.client.post("/api/me/break" + Q, headers=self.headers, name="/api/me/break")
             return
         item = TRACK.items[d["item"]["id"]]
         choice = item.answer if random.random() < 0.7 else (item.answer + 1) % 4
-        self.client.post("/api/me/answer", json={"item_id": item.id, "choice": choice},
+        self.client.post("/api/me/answer" + Q, json={"item_id": item.id, "choice": choice},
                          headers=self.headers, name="/api/me/answer")
 
     @task(1)
     def dashboard(self):
-        self.client.get("/api/me", headers=self.headers, name="/api/me")
+        self.client.get("/api/me" + Q, headers=self.headers, name="/api/me")
 
 
 @events.quitting.add_listener

@@ -73,7 +73,7 @@ def test_deletion_removes_personal_data_but_keeps_unlinkable_credentials(client,
     assert client.get("/api/me", headers=h).status_code == 401
 
     with session_factory(engine_for(settings.database_url))() as db:
-        assert db.get(User, uid) is None and db.get(Twin, uid) is None
+        assert db.get(User, uid) is None and db.get(Twin, (uid, "ml-foundations")) is None
         for model in (Attempt, Decision):
             assert db.scalar(select(func.count()).select_from(model)
                              .where(model.user_id == uid)) == 0
@@ -104,9 +104,9 @@ def test_production_config_accepts_a_proper_setup():
 
 @pytest.mark.parametrize("bad", [
     {"database_url": "sqlite:///x.db"}, {"key_provider": "local"},
-    {"session_secret": "short"}, {"oidc_issuer": ""}, {"dev_login": True},
+    {"session_secret": "short"}, {"oidc_issuer": "", "local_accounts": False}, {"dev_login": True},
     {"allowed_hosts": ["*"]}, {"public_base_url": "http://learn.example.edu"},
-    {"redis_url": ""}, {"neural_enabled": True}, {"min_age": 16},
+    {"redis_url": ""}, {"neural_enabled": True},
 ])
 def test_production_config_rejects_unsafe_settings(bad):
     with pytest.raises(ConfigError):

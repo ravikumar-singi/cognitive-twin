@@ -24,6 +24,7 @@ Development machine: 2 vCPUs shared by the server (2 workers), PostgreSQL 16, Re
 | Run | Requests | Failures | Teaching step p50 / p95 / p99 (ms) | Throughput |
 |---|---:|---:|---|---:|
 | 1,000 learners, 4 min | 25,092 | **0** | next 23 / **260** / 610 · answer 18 / **210** / 640 | 105 req/s |
+| v0.3 (schools, subjects, per-request password-session check), 1,000 learners, 4 min | 25,011 | **0** | next 21 / **240** / 560 · answer 17 / **200** / 590 | 105 req/s |
 | 2,000 learners, 5 min | 43,490 | 0.14% | next 2,900 / 5,800 / 7,200 | 145 req/s (CPU-bound) |
 
 At 2,000 learners the shared 2-CPU machine is saturated: latency rises but the service degrades gracefully, with no errors beyond 0.14% and no stalls. Production runs 3 to 10 instances with dedicated CPUs.

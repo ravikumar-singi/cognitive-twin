@@ -47,12 +47,13 @@ def unsign(token: str, secret: str) -> dict:
     return payload
 
 
-def new_session(user_id: str, secret: str, ttl_minutes: int) -> tuple[str, str]:
-    """Return (session token, csrf token)."""
+def new_session(user_id: str, secret: str, ttl_minutes: int, epoch: int = 0
+                ) -> tuple[str, str]:
+    """Return (session token, csrf token). ``epoch`` ties it to the current password."""
     csrf = secrets.token_urlsafe(24)
     now = int(time.time())
-    return sign({"uid": user_id, "csrf": csrf, "iat": now, "exp": now + ttl_minutes * 60},
-                secret), csrf
+    return sign({"uid": user_id, "csrf": csrf, "iat": now, "exp": now + ttl_minutes * 60,
+                 "se": epoch}, secret), csrf
 
 
 def short_lived(payload: dict, secret: str, seconds: int = 600) -> str:

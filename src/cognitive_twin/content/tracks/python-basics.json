@@ -1,0 +1,560 @@
+{
+ "id": "python-basics",
+ "name": "Python programming basics",
+ "audience": "Ages 12 and up",
+ "description": "Variables, operators, decisions, loops, lists and functions in Python 3.",
+ "skills": [
+  {
+   "id": "py-variables",
+   "name": "Variables and types",
+   "prereqs": [],
+   "rubric": "Creates variables and identifies and converts basic types"
+  },
+  {
+   "id": "py-operators",
+   "name": "Operators",
+   "prereqs": [
+    "py-variables"
+   ],
+   "rubric": "Evaluates arithmetic, comparison and logical expressions"
+  },
+  {
+   "id": "py-conditions",
+   "name": "Making decisions",
+   "prereqs": [
+    "py-operators"
+   ],
+   "rubric": "Reads and writes if, elif and else logic"
+  },
+  {
+   "id": "py-loops",
+   "name": "Loops",
+   "prereqs": [
+    "py-conditions"
+   ],
+   "rubric": "Traces for and while loops, range and break"
+  },
+  {
+   "id": "py-lists",
+   "name": "Lists",
+   "prereqs": [
+    "py-loops"
+   ],
+   "rubric": "Indexes, slices, extends and builds lists"
+  },
+  {
+   "id": "py-functions",
+   "name": "Functions",
+   "prereqs": [
+    "py-conditions"
+   ],
+   "rubric": "Defines and calls functions with parameters and return values"
+  }
+ ],
+ "items": [
+  {
+   "id": "py-variables-1",
+   "skill": "py-variables",
+   "difficulty": 1,
+   "prompt": "After the line x = 5, what does print(x) show?",
+   "options": [
+    "x",
+    "5",
+    "'x'",
+    "Nothing"
+   ],
+   "answer": 1,
+   "hint": "print shows the value stored in the variable."
+  },
+  {
+   "id": "py-variables-2",
+   "skill": "py-variables",
+   "difficulty": 1,
+   "prompt": "Which of these is a valid Python variable name?",
+   "options": [
+    "2cool",
+    "my-name",
+    "my_name",
+    "class"
+   ],
+   "answer": 2,
+   "hint": "Names can use letters, digits and underscores, and cannot start with a digit."
+  },
+  {
+   "id": "py-variables-3",
+   "skill": "py-variables",
+   "difficulty": 2,
+   "prompt": "What is the type of the value 3.0?",
+   "options": [
+    "int",
+    "str",
+    "bool",
+    "float"
+   ],
+   "answer": 3,
+   "hint": "A number with a decimal point is a float."
+  },
+  {
+   "id": "py-variables-4",
+   "skill": "py-variables",
+   "difficulty": 2,
+   "prompt": "After a = 2 and then a = a + 3, what is a?",
+   "options": [
+    "5",
+    "2",
+    "3",
+    "23"
+   ],
+   "answer": 0,
+   "hint": "The right-hand side is worked out first."
+  },
+  {
+   "id": "py-variables-5",
+   "skill": "py-variables",
+   "difficulty": 3,
+   "prompt": "What does print('2' + '3') show?",
+   "options": [
+    "5",
+    "23",
+    "An error",
+    "2 + 3"
+   ],
+   "answer": 1,
+   "hint": "Adding two strings joins them together."
+  },
+  {
+   "id": "py-variables-6",
+   "skill": "py-variables",
+   "difficulty": 3,
+   "prompt": "What does int('7') + 1 give?",
+   "options": [
+    "71",
+    "'8'",
+    "8",
+    "An error"
+   ],
+   "answer": 2,
+   "hint": "int() turns the string '7' into the number 7."
+  },
+  {
+   "id": "py-operators-1",
+   "skill": "py-operators",
+   "difficulty": 1,
+   "prompt": "What is 7 + 3 * 2 in Python?",
+   "options": [
+    "20",
+    "13",
+    "17",
+    "12"
+   ],
+   "answer": 1,
+   "hint": "Multiplication happens before addition."
+  },
+  {
+   "id": "py-operators-2",
+   "skill": "py-operators",
+   "difficulty": 1,
+   "prompt": "What does 10 / 4 give?",
+   "options": [
+    "2.5",
+    "2",
+    "3",
+    "4"
+   ],
+   "answer": 0,
+   "hint": "A single slash always gives a float."
+  },
+  {
+   "id": "py-operators-3",
+   "skill": "py-operators",
+   "difficulty": 2,
+   "prompt": "What does 10 // 4 give?",
+   "options": [
+    "2.5",
+    "3",
+    "2",
+    "0.4"
+   ],
+   "answer": 2,
+   "hint": "A double slash divides and rounds down."
+  },
+  {
+   "id": "py-operators-4",
+   "skill": "py-operators",
+   "difficulty": 2,
+   "prompt": "What does 10 % 3 give?",
+   "options": [
+    "3",
+    "3.33",
+    "0",
+    "1"
+   ],
+   "answer": 3,
+   "hint": "% gives the remainder after division."
+  },
+  {
+   "id": "py-operators-5",
+   "skill": "py-operators",
+   "difficulty": 3,
+   "prompt": "What does 2 ** 3 ** 2 give?",
+   "options": [
+    "64",
+    "512",
+    "36",
+    "12"
+   ],
+   "answer": 1,
+   "hint": "Powers are worked out from right to left."
+  },
+  {
+   "id": "py-operators-6",
+   "skill": "py-operators",
+   "difficulty": 3,
+   "prompt": "What does (5 > 3) and (2 > 4) give?",
+   "options": [
+    "False",
+    "True",
+    "An error",
+    "None"
+   ],
+   "answer": 0,
+   "hint": "'and' is True only if both sides are True."
+  },
+  {
+   "id": "py-conditions-1",
+   "skill": "py-conditions",
+   "difficulty": 1,
+   "prompt": "Which keyword starts a decision in Python?",
+   "options": [
+    "when",
+    "check",
+    "if",
+    "then"
+   ],
+   "answer": 2,
+   "hint": "It is the same word you would use in English."
+  },
+  {
+   "id": "py-conditions-2",
+   "skill": "py-conditions",
+   "difficulty": 1,
+   "prompt": "What does 4 == 4 give?",
+   "options": [
+    "True",
+    "False",
+    "4",
+    "An error"
+   ],
+   "answer": 0,
+   "hint": "== asks whether two values are equal."
+  },
+  {
+   "id": "py-conditions-3",
+   "skill": "py-conditions",
+   "difficulty": 2,
+   "prompt": "x is 7. The code says: if x > 10 do A, elif x > 5 do B, else do C. Which runs?",
+   "options": [
+    "A",
+    "B",
+    "C",
+    "None of them"
+   ],
+   "answer": 1,
+   "hint": "Check the conditions in order and stop at the first True one."
+  },
+  {
+   "id": "py-conditions-4",
+   "skill": "py-conditions",
+   "difficulty": 2,
+   "prompt": "What does not (3 < 5) give?",
+   "options": [
+    "True",
+    "An error",
+    "3",
+    "False"
+   ],
+   "answer": 3,
+   "hint": "'not' flips True to False."
+  },
+  {
+   "id": "py-conditions-5",
+   "skill": "py-conditions",
+   "difficulty": 3,
+   "prompt": "x is 5. What does print('big' if x > 5 else 'small') show?",
+   "options": [
+    "big",
+    "small",
+    "True",
+    "An error"
+   ],
+   "answer": 1,
+   "hint": "5 is not greater than 5."
+  },
+  {
+   "id": "py-conditions-6",
+   "skill": "py-conditions",
+   "difficulty": 3,
+   "prompt": "Which condition is True exactly when n is an even number?",
+   "options": [
+    "n / 2 == 0",
+    "n % 2 == 1",
+    "n % 2 == 0",
+    "n // 2 == 0"
+   ],
+   "answer": 2,
+   "hint": "Even numbers leave no remainder when divided by 2."
+  },
+  {
+   "id": "py-loops-1",
+   "skill": "py-loops",
+   "difficulty": 1,
+   "prompt": "How many times does the body of 'for i in range(3):' run?",
+   "options": [
+    "2",
+    "3",
+    "4",
+    "0"
+   ],
+   "answer": 1,
+   "hint": "range(3) gives 0, 1 and 2."
+  },
+  {
+   "id": "py-loops-2",
+   "skill": "py-loops",
+   "difficulty": 1,
+   "prompt": "Which keyword makes a loop that repeats while a condition stays true?",
+   "options": [
+    "while",
+    "repeat",
+    "until",
+    "if"
+   ],
+   "answer": 0,
+   "hint": "The keyword says exactly what it does."
+  },
+  {
+   "id": "py-loops-3",
+   "skill": "py-loops",
+   "difficulty": 2,
+   "prompt": "What numbers does range(1, 4) produce?",
+   "options": [
+    "1, 2, 3, 4",
+    "0, 1, 2, 3",
+    "1, 2, 3",
+    "1, 4"
+   ],
+   "answer": 2,
+   "hint": "range stops just before the second number."
+  },
+  {
+   "id": "py-loops-4",
+   "skill": "py-loops",
+   "difficulty": 2,
+   "prompt": "total starts at 0. A loop runs total += i for each i in range(4). What is total at the end?",
+   "options": [
+    "4",
+    "10",
+    "3",
+    "6"
+   ],
+   "answer": 3,
+   "hint": "Add 0 + 1 + 2 + 3."
+  },
+  {
+   "id": "py-loops-5",
+   "skill": "py-loops",
+   "difficulty": 3,
+   "prompt": "What does 'break' do inside a loop?",
+   "options": [
+    "Skips to the next turn of the loop",
+    "Stops the loop immediately",
+    "Pauses the program",
+    "Restarts the loop"
+   ],
+   "answer": 1,
+   "hint": "'continue' skips a turn; 'break' leaves the loop."
+  },
+  {
+   "id": "py-loops-6",
+   "skill": "py-loops",
+   "difficulty": 3,
+   "prompt": "n starts at 16. A loop runs n = n // 2 while n > 1. How many times does the loop body run?",
+   "options": [
+    "4",
+    "3",
+    "5",
+    "16"
+   ],
+   "answer": 0,
+   "hint": "Trace it: 16, 8, 4, 2, 1."
+  },
+  {
+   "id": "py-lists-1",
+   "skill": "py-lists",
+   "difficulty": 1,
+   "prompt": "nums = [10, 20, 30]. What is nums[0]?",
+   "options": [
+    "20",
+    "30",
+    "10",
+    "An error"
+   ],
+   "answer": 2,
+   "hint": "Lists start counting at 0."
+  },
+  {
+   "id": "py-lists-2",
+   "skill": "py-lists",
+   "difficulty": 1,
+   "prompt": "What does len([4, 5, 6, 7]) give?",
+   "options": [
+    "4",
+    "3",
+    "7",
+    "22"
+   ],
+   "answer": 0,
+   "hint": "len counts the items."
+  },
+  {
+   "id": "py-lists-3",
+   "skill": "py-lists",
+   "difficulty": 2,
+   "prompt": "nums = [1, 2, 3]. After nums.append(4), what is nums?",
+   "options": [
+    "[4, 1, 2, 3]",
+    "[1, 2, 3, 4]",
+    "[1, 2, 3]",
+    "[1, 2, 4]"
+   ],
+   "answer": 1,
+   "hint": "append adds to the end."
+  },
+  {
+   "id": "py-lists-4",
+   "skill": "py-lists",
+   "difficulty": 2,
+   "prompt": "nums = [10, 20, 30]. What is nums[-1]?",
+   "options": [
+    "10",
+    "An error",
+    "20",
+    "30"
+   ],
+   "answer": 3,
+   "hint": "Negative indexes count from the end."
+  },
+  {
+   "id": "py-lists-5",
+   "skill": "py-lists",
+   "difficulty": 3,
+   "prompt": "letters = ['a', 'b', 'c', 'd']. What is letters[1:3]?",
+   "options": [
+    "['a', 'b', 'c']",
+    "['b', 'c', 'd']",
+    "['b', 'c']",
+    "['a', 'b']"
+   ],
+   "answer": 2,
+   "hint": "A slice includes the start index but not the end index."
+  },
+  {
+   "id": "py-lists-6",
+   "skill": "py-lists",
+   "difficulty": 3,
+   "prompt": "What does [x * 2 for x in [1, 2, 3]] give?",
+   "options": [
+    "[2, 4, 6]",
+    "[1, 2, 3, 1, 2, 3]",
+    "[1, 4, 9]",
+    "6"
+   ],
+   "answer": 0,
+   "hint": "Each item is doubled and collected into a new list."
+  },
+  {
+   "id": "py-functions-1",
+   "skill": "py-functions",
+   "difficulty": 1,
+   "prompt": "Which keyword defines a function?",
+   "options": [
+    "func",
+    "def",
+    "function",
+    "define"
+   ],
+   "answer": 1,
+   "hint": "It is short for 'define'."
+  },
+  {
+   "id": "py-functions-2",
+   "skill": "py-functions",
+   "difficulty": 1,
+   "prompt": "What does a return statement do?",
+   "options": [
+    "Prints a value on the screen",
+    "Repeats the function",
+    "Sends a value back to the caller",
+    "Deletes the function"
+   ],
+   "answer": 2,
+   "hint": "The caller receives the returned value."
+  },
+  {
+   "id": "py-functions-3",
+   "skill": "py-functions",
+   "difficulty": 2,
+   "prompt": "A function is defined as def double(n): return n * 2. What is double(4)?",
+   "options": [
+    "8",
+    "6",
+    "44",
+    "16"
+   ],
+   "answer": 0,
+   "hint": "n is 4 inside the function."
+  },
+  {
+   "id": "py-functions-4",
+   "skill": "py-functions",
+   "difficulty": 2,
+   "prompt": "A function is defined as def add(a, b=10): return a + b. What is add(5)?",
+   "options": [
+    "5",
+    "An error",
+    "10",
+    "15"
+   ],
+   "answer": 3,
+   "hint": "b uses its default value when it is not given."
+  },
+  {
+   "id": "py-functions-5",
+   "skill": "py-functions",
+   "difficulty": 3,
+   "prompt": "A function has no return statement. What does calling it give back?",
+   "options": [
+    "0",
+    "None",
+    "An error",
+    "An empty string"
+   ],
+   "answer": 1,
+   "hint": "Python returns a special 'nothing' value."
+  },
+  {
+   "id": "py-functions-6",
+   "skill": "py-functions",
+   "difficulty": 3,
+   "prompt": "f is defined as def f(n): return n if n <= 1 else n * f(n - 1). What is f(4)?",
+   "options": [
+    "10",
+    "4",
+    "24",
+    "An error"
+   ],
+   "answer": 2,
+   "hint": "It works out 4 x 3 x 2 x 1."
+  }
+ ]
+}

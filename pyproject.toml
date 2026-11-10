@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cognitive-twin"
-version = "0.2.0"
+version = "0.3.0"
 description = "Cognition-native learning platform: agentic tutors, an edge-only neural sensing pipeline and a validator-signed Proof-of-Capability ledger."
 readme = "README.md"
 license = { text = "MIT" }
@@ -41,7 +41,7 @@ cognitive-twin = "cognitive_twin.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-cognitive_twin = ["web/*.html", "web/*.js", "web/*.css", "content/*.json", "db/migrations/*.mako", "db/migrations/versions/*.py"]
+cognitive_twin = ["web/*.html", "web/*.js", "web/*.css", "content/tracks/*.json", "content/policies/*.json", "db/migrations/*.mako", "db/migrations/versions/*.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

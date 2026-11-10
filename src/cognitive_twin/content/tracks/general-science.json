@@ -1,0 +1,556 @@
+{
+ "id": "general-science",
+ "name": "General science",
+ "audience": "Ages 11 to 14",
+ "description": "States of matter, atoms, forces, energy, cells and ecosystems.",
+ "skills": [
+  {
+   "id": "sci-matter",
+   "name": "States of matter",
+   "prereqs": [],
+   "rubric": "Describes solids, liquids and gases and changes of state using particles"
+  },
+  {
+   "id": "sci-atoms",
+   "name": "Atoms and elements",
+   "prereqs": [
+    "sci-matter"
+   ],
+   "rubric": "Identifies atoms, elements, compounds and subatomic particles"
+  },
+  {
+   "id": "sci-forces",
+   "name": "Forces and motion",
+   "prereqs": [],
+   "rubric": "Names forces, calculates speed and applies balanced-force reasoning"
+  },
+  {
+   "id": "sci-energy",
+   "name": "Energy",
+   "prereqs": [
+    "sci-forces"
+   ],
+   "rubric": "Identifies energy stores, transfers and conservation"
+  },
+  {
+   "id": "sci-cells",
+   "name": "Cells",
+   "prereqs": [],
+   "rubric": "Identifies cell parts and their functions in plants and animals"
+  },
+  {
+   "id": "sci-ecosystems",
+   "name": "Ecosystems",
+   "prereqs": [
+    "sci-cells"
+   ],
+   "rubric": "Interprets food chains and explains changes in populations"
+  }
+ ],
+ "items": [
+  {
+   "id": "sci-matter-1",
+   "skill": "sci-matter",
+   "difficulty": 1,
+   "prompt": "Which state of matter keeps a fixed shape?",
+   "options": [
+    "Solid",
+    "Liquid",
+    "Gas",
+    "All of them"
+   ],
+   "answer": 0,
+   "hint": "Think of an ice cube compared with water or steam."
+  },
+  {
+   "id": "sci-matter-2",
+   "skill": "sci-matter",
+   "difficulty": 1,
+   "prompt": "What is it called when a liquid turns into a gas?",
+   "options": [
+    "Freezing",
+    "Melting",
+    "Evaporation",
+    "Condensation"
+   ],
+   "answer": 2,
+   "hint": "Puddles do this on a sunny day."
+  },
+  {
+   "id": "sci-matter-3",
+   "skill": "sci-matter",
+   "difficulty": 2,
+   "prompt": "At what temperature does pure water boil at sea level?",
+   "options": [
+    "0 °C",
+    "50 °C",
+    "90 °C",
+    "100 °C"
+   ],
+   "answer": 3,
+   "hint": "Water freezes at 0 °C and boils at a round number."
+  },
+  {
+   "id": "sci-matter-4",
+   "skill": "sci-matter",
+   "difficulty": 2,
+   "prompt": "In which state are the particles furthest apart?",
+   "options": [
+    "Solid",
+    "Gas",
+    "Liquid",
+    "They are always the same distance apart"
+   ],
+   "answer": 1,
+   "hint": "This state can be squashed most easily."
+  },
+  {
+   "id": "sci-matter-5",
+   "skill": "sci-matter",
+   "difficulty": 3,
+   "prompt": "What is it called when a solid turns straight into a gas?",
+   "options": [
+    "Sublimation",
+    "Condensation",
+    "Deposition",
+    "Evaporation"
+   ],
+   "answer": 0,
+   "hint": "Dry ice does this."
+  },
+  {
+   "id": "sci-matter-6",
+   "skill": "sci-matter",
+   "difficulty": 3,
+   "prompt": "Why does a gas spread out to fill its whole container?",
+   "options": [
+    "Its particles are very large",
+    "Its particles are held in fixed positions",
+    "Its particles move freely in all directions",
+    "Its particles stop moving"
+   ],
+   "answer": 2,
+   "hint": "Think about how the particles move."
+  },
+  {
+   "id": "sci-atoms-1",
+   "skill": "sci-atoms",
+   "difficulty": 1,
+   "prompt": "What is the smallest particle of an element?",
+   "options": [
+    "Molecule",
+    "Atom",
+    "Cell",
+    "Grain"
+   ],
+   "answer": 1,
+   "hint": "Everything is built from these."
+  },
+  {
+   "id": "sci-atoms-2",
+   "skill": "sci-atoms",
+   "difficulty": 1,
+   "prompt": "What is the chemical symbol for oxygen?",
+   "options": [
+    "Ox",
+    "Og",
+    "O",
+    "On"
+   ],
+   "answer": 2,
+   "hint": "It is a single capital letter."
+  },
+  {
+   "id": "sci-atoms-3",
+   "skill": "sci-atoms",
+   "difficulty": 2,
+   "prompt": "Which particle in an atom has a negative charge?",
+   "options": [
+    "Proton",
+    "Neutron",
+    "Nucleus",
+    "Electron"
+   ],
+   "answer": 3,
+   "hint": "These particles move around the nucleus."
+  },
+  {
+   "id": "sci-atoms-4",
+   "skill": "sci-atoms",
+   "difficulty": 2,
+   "prompt": "What is the chemical formula for water?",
+   "options": [
+    "H2O",
+    "HO2",
+    "CO2",
+    "O2"
+   ],
+   "answer": 0,
+   "hint": "Two hydrogen atoms and one oxygen atom."
+  },
+  {
+   "id": "sci-atoms-5",
+   "skill": "sci-atoms",
+   "difficulty": 3,
+   "prompt": "An atom has 6 protons. What is its atomic number?",
+   "options": [
+    "12",
+    "6",
+    "3",
+    "It depends on the neutrons"
+   ],
+   "answer": 1,
+   "hint": "The atomic number is the number of protons."
+  },
+  {
+   "id": "sci-atoms-6",
+   "skill": "sci-atoms",
+   "difficulty": 3,
+   "prompt": "Which of these is a compound?",
+   "options": [
+    "Oxygen gas (O2)",
+    "Gold (Au)",
+    "Carbon dioxide (CO2)",
+    "Helium (He)"
+   ],
+   "answer": 2,
+   "hint": "A compound contains more than one element joined together."
+  },
+  {
+   "id": "sci-forces-1",
+   "skill": "sci-forces",
+   "difficulty": 1,
+   "prompt": "Which force pulls objects towards the Earth?",
+   "options": [
+    "Friction",
+    "Magnetism",
+    "Air resistance",
+    "Gravity"
+   ],
+   "answer": 3,
+   "hint": "It is why things fall."
+  },
+  {
+   "id": "sci-forces-2",
+   "skill": "sci-forces",
+   "difficulty": 1,
+   "prompt": "What is the unit of force?",
+   "options": [
+    "Newton",
+    "Joule",
+    "Watt",
+    "Kilogram"
+   ],
+   "answer": 0,
+   "hint": "It is named after a famous scientist."
+  },
+  {
+   "id": "sci-forces-3",
+   "skill": "sci-forces",
+   "difficulty": 2,
+   "prompt": "A car travels 100 km in 2 hours. What is its average speed?",
+   "options": [
+    "200 km/h",
+    "50 km/h",
+    "102 km/h",
+    "98 km/h"
+   ],
+   "answer": 1,
+   "hint": "Speed is distance divided by time."
+  },
+  {
+   "id": "sci-forces-4",
+   "skill": "sci-forces",
+   "difficulty": 2,
+   "prompt": "Which force slows down an object sliding across a table?",
+   "options": [
+    "Gravity",
+    "Upthrust",
+    "Friction",
+    "Thrust"
+   ],
+   "answer": 2,
+   "hint": "It acts between surfaces that rub together."
+  },
+  {
+   "id": "sci-forces-5",
+   "skill": "sci-forces",
+   "difficulty": 3,
+   "prompt": "The forces on a moving object are balanced. What happens to its motion?",
+   "options": [
+    "It keeps the same speed and direction",
+    "It speeds up",
+    "It stops straight away",
+    "It changes direction"
+   ],
+   "answer": 0,
+   "hint": "Only unbalanced forces change motion."
+  },
+  {
+   "id": "sci-forces-6",
+   "skill": "sci-forces",
+   "difficulty": 3,
+   "prompt": "A force of 10 N acts on a mass of 2 kg. What is the acceleration?",
+   "options": [
+    "20 m/s²",
+    "0.2 m/s²",
+    "12 m/s²",
+    "5 m/s²"
+   ],
+   "answer": 3,
+   "hint": "Acceleration is force divided by mass."
+  },
+  {
+   "id": "sci-energy-1",
+   "skill": "sci-energy",
+   "difficulty": 1,
+   "prompt": "Which of these is a renewable energy source?",
+   "options": [
+    "Coal",
+    "Solar",
+    "Natural gas",
+    "Oil"
+   ],
+   "answer": 1,
+   "hint": "It will not run out."
+  },
+  {
+   "id": "sci-energy-2",
+   "skill": "sci-energy",
+   "difficulty": 1,
+   "prompt": "What kind of energy does a moving object have?",
+   "options": [
+    "Chemical energy",
+    "Sound energy",
+    "Kinetic energy",
+    "Nuclear energy"
+   ],
+   "answer": 2,
+   "hint": "The faster it moves, the more it has."
+  },
+  {
+   "id": "sci-energy-3",
+   "skill": "sci-energy",
+   "difficulty": 2,
+   "prompt": "What is the unit of energy?",
+   "options": [
+    "Joule",
+    "Newton",
+    "Volt",
+    "Metre"
+   ],
+   "answer": 0,
+   "hint": "Food labels often use thousands of these."
+  },
+  {
+   "id": "sci-energy-4",
+   "skill": "sci-energy",
+   "difficulty": 2,
+   "prompt": "Which energy transfer happens in a battery-powered torch?",
+   "options": [
+    "Light to chemical",
+    "Heat to electrical",
+    "Kinetic to light",
+    "Chemical to electrical to light"
+   ],
+   "answer": 3,
+   "hint": "Start with what is stored in the battery."
+  },
+  {
+   "id": "sci-energy-5",
+   "skill": "sci-energy",
+   "difficulty": 3,
+   "prompt": "Energy cannot be created or destroyed, only transferred. What is this law called?",
+   "options": [
+    "Newton's first law",
+    "Conservation of energy",
+    "The law of gravity",
+    "Ohm's law"
+   ],
+   "answer": 1,
+   "hint": "'Conserved' means the total stays the same."
+  },
+  {
+   "id": "sci-energy-6",
+   "skill": "sci-energy",
+   "difficulty": 3,
+   "prompt": "A ball is lifted higher above the ground. Which energy store increases?",
+   "options": [
+    "Kinetic energy",
+    "Thermal energy",
+    "Gravitational potential energy",
+    "Elastic energy"
+   ],
+   "answer": 2,
+   "hint": "It depends on height."
+  },
+  {
+   "id": "sci-cells-1",
+   "skill": "sci-cells",
+   "difficulty": 1,
+   "prompt": "What is the basic building block of all living things?",
+   "options": [
+    "Atom",
+    "Organ",
+    "Tissue",
+    "Cell"
+   ],
+   "answer": 3,
+   "hint": "Your body has trillions of them."
+  },
+  {
+   "id": "sci-cells-2",
+   "skill": "sci-cells",
+   "difficulty": 1,
+   "prompt": "Which part of a cell controls its activities?",
+   "options": [
+    "Nucleus",
+    "Cell wall",
+    "Cytoplasm",
+    "Vacuole"
+   ],
+   "answer": 0,
+   "hint": "It contains the genetic material."
+  },
+  {
+   "id": "sci-cells-3",
+   "skill": "sci-cells",
+   "difficulty": 2,
+   "prompt": "Which part is found in plant cells but not in animal cells?",
+   "options": [
+    "Nucleus",
+    "Cell wall",
+    "Cell membrane",
+    "Mitochondria"
+   ],
+   "answer": 1,
+   "hint": "It gives plant cells a rigid shape."
+  },
+  {
+   "id": "sci-cells-4",
+   "skill": "sci-cells",
+   "difficulty": 2,
+   "prompt": "Where does photosynthesis take place in a plant cell?",
+   "options": [
+    "Nucleus",
+    "Mitochondria",
+    "Chloroplasts",
+    "Cell membrane"
+   ],
+   "answer": 2,
+   "hint": "These parts are green."
+  },
+  {
+   "id": "sci-cells-5",
+   "skill": "sci-cells",
+   "difficulty": 3,
+   "prompt": "What is the main job of mitochondria?",
+   "options": [
+    "Releasing energy through respiration",
+    "Making food from sunlight",
+    "Storing water",
+    "Controlling what enters the cell"
+   ],
+   "answer": 0,
+   "hint": "They are often called the powerhouses of the cell."
+  },
+  {
+   "id": "sci-cells-6",
+   "skill": "sci-cells",
+   "difficulty": 3,
+   "prompt": "Which gas do plants take in for photosynthesis?",
+   "options": [
+    "Oxygen",
+    "Nitrogen",
+    "Hydrogen",
+    "Carbon dioxide"
+   ],
+   "answer": 3,
+   "hint": "Plants give out oxygen and take in this gas."
+  },
+  {
+   "id": "sci-ecosystems-1",
+   "skill": "sci-ecosystems",
+   "difficulty": 1,
+   "prompt": "What do we call an animal that eats only plants?",
+   "options": [
+    "Carnivore",
+    "Herbivore",
+    "Omnivore",
+    "Decomposer"
+   ],
+   "answer": 1,
+   "hint": "Cows and rabbits are examples."
+  },
+  {
+   "id": "sci-ecosystems-2",
+   "skill": "sci-ecosystems",
+   "difficulty": 1,
+   "prompt": "Where does almost all the energy in a food chain come from originally?",
+   "options": [
+    "Soil",
+    "Water",
+    "The Sun",
+    "Wind"
+   ],
+   "answer": 2,
+   "hint": "Plants capture it with their leaves."
+  },
+  {
+   "id": "sci-ecosystems-3",
+   "skill": "sci-ecosystems",
+   "difficulty": 2,
+   "prompt": "In the food chain grass → rabbit → fox, what is the rabbit?",
+   "options": [
+    "Primary consumer",
+    "Producer",
+    "Secondary consumer",
+    "Decomposer"
+   ],
+   "answer": 0,
+   "hint": "It is the first animal to eat in the chain."
+  },
+  {
+   "id": "sci-ecosystems-4",
+   "skill": "sci-ecosystems",
+   "difficulty": 2,
+   "prompt": "What do decomposers such as fungi do?",
+   "options": [
+    "Make food from sunlight",
+    "Hunt other animals",
+    "Pollinate flowers",
+    "Break down dead material"
+   ],
+   "answer": 3,
+   "hint": "They recycle nutrients back into the soil."
+  },
+  {
+   "id": "sci-ecosystems-5",
+   "skill": "sci-ecosystems",
+   "difficulty": 3,
+   "prompt": "In the food chain grass → rabbit → fox, all the foxes disappear. What is most likely to happen first?",
+   "options": [
+    "Rabbit numbers rise",
+    "Rabbit numbers fall",
+    "The grass grows taller",
+    "Nothing changes"
+   ],
+   "answer": 0,
+   "hint": "Think about what was eating the rabbits."
+  },
+  {
+   "id": "sci-ecosystems-6",
+   "skill": "sci-ecosystems",
+   "difficulty": 3,
+   "prompt": "Why are there usually fewer predators than prey in an ecosystem?",
+   "options": [
+    "Predators are always smaller",
+    "Prey animals live longer",
+    "Energy is lost at each step of the food chain",
+    "Predators need less food"
+   ],
+   "answer": 2,
+   "hint": "Less energy is available higher up the chain."
+  }
+ ]
+}

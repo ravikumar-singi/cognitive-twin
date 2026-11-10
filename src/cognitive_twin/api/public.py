@@ -43,6 +43,12 @@ def keys(request: Request, db: Session = DB) -> list[dict]:
     return KeyRegistry(db, state(request).key_provider).published()
 
 
+@router.get("/api/public/subjects")
+def subjects(request: Request) -> list[dict]:
+    return [{"id": t.id, "name": t.name, "audience": t.audience, "description": t.description,
+             "skills": len(t.skills)} for t in state(request).tracks.values()]
+
+
 @router.get("/healthz")
 def healthz() -> dict:
     return {"status": "ok"}
@@ -55,7 +61,8 @@ def readyz(request: Request, db: Session = DB):
     try:
         db.execute(text("SELECT 1"))
         checks["database"] = True
-        st.policies.current(db)
+        for track_id in st.tracks:
+            st.policies.current(db, track_id)
         checks["policy"] = True
     except Exception as e:  # noqa: BLE001 - readiness reports, it never raises
         log_event(log, "readiness check failed", level=logging.WARNING, error=str(e)[:200])
@@ -77,6 +84,7 @@ class DemoBody(BaseModel):
     seed: int | None = Field(default=None, ge=0, le=2**31)
     headband: bool = True
     name: str = Field(default="Demo student", max_length=40)
+    track: str = Field(default="ml-foundations", max_length=60, pattern=r"^[a-z0-9-]+$")
 
 
 @router.post("/api/demo/run")
@@ -89,10 +97,12 @@ def demo(body: DemoBody, request: Request, db: Session = DB) -> dict:
     st = state(request)
     if not st.settings.demo_enabled:
         raise HTTPException(404, "the demo is not enabled here")
-    policy = st.policies.current(db)
+    track = st.tracks.get(body.track)
+    if track is None:
+        raise HTTPException(404, "unknown subject")
+    policy = st.policies.current(db, track.id)
     seed = body.seed if body.seed is not None else secrets.randbelow(2**31)
     rng = np.random.default_rng(seed)
-    track = st.track
     learner = SimulatedLearner.sample(track, rng)
     twin = CognitiveTwin("demo", track)
     cur, tutor, pacing = policy.agents(track, {})

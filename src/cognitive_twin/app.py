@@ -37,9 +37,9 @@ from .observability import (
     setup_logging,
     setup_tracing,
 )
-from .policy_store import PolicyCache, PolicyError, active_version, import_policy_file
+from .policy_store import PolicyCache, PolicyError, import_bundled_policies
 from .security import IPRateLimitMiddleware, RateLimiter, SecurityHeadersMiddleware
-from .skills import load_track
+from .skills import load_tracks
 
 STATIC = ("app.js", "app.css")
 
@@ -77,11 +77,13 @@ def _bootstrap(st: AppState) -> None:
         lg.ensure_genesis()
         if st.settings.is_dev:
             lg.bootstrap_dev_validators()
-            if active_version(db) is None:
-                from .rl.teacher import MultiAgentTeacher  # noqa: F401 (policy format owner)
-                path = resources.files("cognitive_twin").joinpath("content/policy.json")
-                import_policy_file(db, str(path), actor_id="system",
-                                   notes="bundled policy (development bootstrap)")
+            seed_demo_school(db)
+        # Every subject starts with the benchmarked policy shipped in this release; admins
+        # can import and activate newer versions later (R5). Existing activations are kept.
+        added = import_bundled_policies(db, actor_id="system")
+        if added:
+            db.add(AuditEvent(action="policy.bundled_import", target="startup", outcome="ok",
+                              details={"subjects": added}))
         ok, bad = lg.verify_chain()  # R1.2: verified on startup
         st.chain_ok = ok
         db.add(AuditEvent(action="ledger.verify", target="startup",
@@ -91,12 +93,36 @@ def _bootstrap(st: AppState) -> None:
               level=level, first_bad_block=bad)
 
 
+DEMO_CLASSES = (("ML Pilot A", "ml-foundations", "MLPILOTA"),
+                ("ML Pilot B", "ml-foundations", "MLPILOTB"),
+                ("Maths 5A", "middle-school-maths", "MATHS5A"),
+                ("Algebra 9B", "high-school-algebra", "ALGEBRA9B"))
+
+
+def seed_demo_school(db) -> None:
+    """Development only: a school with classes and fixed class codes to try things with."""
+    from sqlalchemy import select
+
+    from .auth.provision import DEV_SCHOOL
+    from .db.models import Cohort, School
+    school = db.scalar(select(School).where(School.name == DEV_SCHOOL))
+    if school is None:
+        school = School(name=DEV_SCHOOL, region="IN", youngest_band="under13", sign_in="local")
+        db.add(school)
+        db.flush()
+    for name, track, code in DEMO_CLASSES:
+        c = db.scalar(select(Cohort).where(Cohort.school_id == school.id, Cohort.name == name))
+        if c is None:
+            db.add(Cohort(school_id=school.id, name=name, track_id=track, join_code=code))
+    db.flush()
+
+
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = (settings or get_settings()).validate()
     setup_logging(settings.log_level)
     engine = engine_for(settings.database_url)
     sessions = session_factory(engine)
-    st = AppState(settings=settings, engine=engine, sessions=sessions, track=load_track(),
+    st = AppState(settings=settings, engine=engine, sessions=sessions, tracks=load_tracks(),
                   policies=PolicyCache(settings.policy_cache_seconds),
                   key_provider=provider_from_settings(settings),
                   limiter=RateLimiter(settings.redis_url),
@@ -122,7 +148,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_hosts)
     app.add_middleware(RequestContextMiddleware)
 
-    for r in (auth.router, learner.router, staff.edu, staff.adm, public.router):
+    for r in (auth.router, learner.router, staff.edu, staff.sch, staff.adm, public.router):
         app.include_router(r)
 
     @app.exception_handler(ConsentRequired)

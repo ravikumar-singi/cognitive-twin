@@ -53,10 +53,14 @@ class Settings:
     claim_role: str = "ct_role"
     claim_birthdate: str = "birthdate"
     claim_adult: str = "ct_adult_verified"
+    claim_age_band: str = "ct_age_band"
+    claim_guardian: str = "ct_guardian_consent"
     claim_region: str = "ct_region"
     claim_cohorts: str = "ct_cohorts"
     claim_institution: str = "ct_institution"
     dev_login: bool = True
+    # Class codes and usernames, for schools without single sign-on
+    local_accounts: bool = True
 
     # Keys
     key_provider: str = "local"  # "local" (development only) or "aws-kms"
@@ -68,7 +72,6 @@ class Settings:
     consent_policy_version: str = "2026-11-pilot-v1"
     neural_enabled: bool = False
     demo_enabled: bool = True
-    min_age: int = 18
 
     # Rate limits (requests per minute)
     rate_user_per_min: int = 300
@@ -131,6 +134,9 @@ class Settings:
             claim_role=os.environ.get("CT_CLAIM_ROLE", d.claim_role),
             claim_birthdate=os.environ.get("CT_CLAIM_BIRTHDATE", d.claim_birthdate),
             claim_adult=os.environ.get("CT_CLAIM_ADULT", d.claim_adult),
+            claim_age_band=os.environ.get("CT_CLAIM_AGE_BAND", d.claim_age_band),
+            claim_guardian=os.environ.get("CT_CLAIM_GUARDIAN", d.claim_guardian),
+            local_accounts=_bool("CT_LOCAL_ACCOUNTS", True),
             claim_region=os.environ.get("CT_CLAIM_REGION", d.claim_region),
             claim_cohorts=os.environ.get("CT_CLAIM_COHORTS", d.claim_cohorts),
             claim_institution=os.environ.get("CT_CLAIM_INSTITUTION", d.claim_institution),
@@ -144,7 +150,6 @@ class Settings:
                                                   d.consent_policy_version),
             neural_enabled=_bool("CT_NEURAL_ENABLED", False),
             demo_enabled=_bool("CT_DEMO_ENABLED", env in ("development", "test")),
-            min_age=_int("CT_MIN_AGE", 18),
             rate_user_per_min=_int("CT_RATE_USER_PER_MIN", d.rate_user_per_min),
             rate_ip_per_min=_int("CT_RATE_IP_PER_MIN", d.rate_ip_per_min),
             rate_auth_per_min=_int("CT_RATE_AUTH_PER_MIN", d.rate_auth_per_min),
@@ -158,8 +163,6 @@ class Settings:
         problems: list[str] = []
         if self.neural_enabled:
             problems.append("CT_NEURAL_ENABLED must stay false in phase one (requirement R4.3)")
-        if self.min_age < 18:
-            problems.append("phase one is limited to adults: CT_MIN_AGE must be at least 18")
         if not self.is_dev:
             if self.database_url.startswith("sqlite"):
                 problems.append("DATABASE_URL must point to PostgreSQL outside development")
@@ -167,8 +170,9 @@ class Settings:
                 problems.append("CT_KEY_PROVIDER=local is development-only; use aws-kms")
             if len(self.session_secret) < 32 or "dev-only" in self.session_secret:
                 problems.append("CT_SESSION_SECRET must be a random secret of 32+ characters")
-            if not self.oidc_enabled:
-                problems.append("OIDC_ISSUER and OIDC_CLIENT_ID are required outside development")
+            if not self.oidc_enabled and not self.local_accounts:
+                problems.append("no way to sign in: set OIDC_ISSUER and OIDC_CLIENT_ID, or "
+                                "leave CT_LOCAL_ACCOUNTS on")
             if self.dev_login:
                 problems.append("CT_DEV_LOGIN must be false outside development")
             if "*" in self.allowed_hosts:

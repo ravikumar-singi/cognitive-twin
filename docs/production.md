@@ -20,7 +20,7 @@ flowchart LR
 - **Stateless service (R1.4).** Each request loads the learner's state from PostgreSQL under a row lock and writes it back in the same transaction. Rate-limit counters live in Redis. Any instance can serve any request.
 - **Append-only records (R1.2, R4.2).** Ledger blocks, credentials, revocations, consent records, policy activations and the audit log reject UPDATE, DELETE and TRUNCATE, enforced by triggers *and* by the `ct_app` role's grants.
 - **Keys (R2).** Validator keys are KMS keys the service can only sign with. Credentials record the key ID and version; verification uses stored public keys, so it survives restarts, rotation and KMS outages.
-- **Identity (R3).** Sign-in only through the institution's IdP. Role, adulthood, region and cohorts come from IdP claims.
+- **Identity (R3).** Schools with an identity provider sign in through it (role, age group, guardian consent, region and classes come from its claims). Schools without one use class codes and usernames (`CT_LOCAL_ACCOUNTS`, on by default): no e-mail, scrypt-hashed passwords, lockout after 5 tries, invitation codes for staff. See [children's data](compliance/children.md).
 
 ## Environments (R5.4)
 
@@ -41,18 +41,25 @@ Every change goes to staging first: `.github/workflows/deploy.yml` builds one im
 
    | Claim | Meaning | Required |
    |---|---|---|
-   | `ct_role` | `learner`, `educator` or `admin` | yes |
-   | `ct_adult_verified` (boolean) or `birthdate` | adulthood from institution records | yes |
+   | `ct_role` | `learner`, `educator`, `school_admin` or `admin` | yes |
+   | `ct_age_band` (`under13`, `13to17`, `adult`), or `ct_adult_verified` (boolean), or `birthdate` | age group from school records; the birthdate is not stored | for learners |
+   | `ct_guardian_consent` (boolean) | the school holds a parent's or guardian's agreement | for under-18s |
    | `ct_region` | e.g. `IN`, `UK`, `EU` | yes |
-   | `ct_cohorts` | list of cohort names | for learners and educators |
-   | `ct_institution` | display only | no |
+   | `ct_cohorts` | list of class names | for learners and teachers |
+   | `ct_institution` | the school; users with the same value share a school | recommended |
+
+   Schools that don't have an identity provider skip this step and use class codes (step 9).
 
 4. **GitHub:** create `staging` and `production` environments (production with required reviewers), the secret `AWS_DEPLOY_ROLE_ARN` (an IAM role trusting GitHub OIDC) and the variable `AWS_REGION`.
 5. **Deploy staging** (run the Deploy workflow), then set the IdP client secret:
    `aws secretsmanager put-secret-value --secret-id ct-staging/oidc-client-secret --secret-string '<secret>'`
 6. **Register validators and keys** as one-off tasks: for each validator, `cognitive-twin validators add <id> "<name>" <stake>` then `cognitive-twin keys rotate <id> --kms-key-arn <arn>` (ARNs are in the `validator_kms_keys` Terraform output).
-7. **Import the teaching policy:** `cognitive-twin policy import /path/policy.json`. The bundled `src/cognitive_twin/content/policy.json` is the benchmarked phase-one policy.
+7. **Teaching policies** for all five subjects are activated automatically on first start from `src/cognitive_twin/content/policies/` (logged as `policy.bundled_import`). Later versions go through `cognitive-twin policy import FILE` and roll back with `policy activate`.
 8. **Run the restore test** ([runbook](runbooks/backup-restore.md)), the **load test** ([load-testing.md](load-testing.md)) and the **penetration test** ([scope](compliance/pentest-scope.md)) on staging.
+
+9. **Add schools:** `cognitive-twin school create "Hill Primary" --region IN --youngest under13` prints a one-time invitation code for the school's administrator (or use the *Schools* tab as a platform administrator). The school administrator signs in with *I'm a teacher with a code*, invites teachers and chooses subjects and minimum age; teachers create classes and share their class codes. Before under-18s use it, work through the [children's data checklist](compliance/children.md#before-children-use-it-checklist).
+
+**Upgrading from v0.2.** Migration `0002` moves every existing user and cohort into one school named after the partner institution (single sign-on, adults only, as before) and keeps each learner's progress as their *machine-learning foundations* subject. It is not reversible: take a snapshot first. The deploy task already runs `cognitive-twin db create-app-role` after migrating, which grants the `ct_app` role access to the new tables.
 
 ## Configuration reference
 
@@ -64,7 +71,9 @@ Every change goes to staging first: `.github/workflows/deploy.yml` builds one im
 | `REDIS_URL` | Shared rate-limit counters (required outside development) |
 | `CT_SESSION_SECRET` | 32+ random characters; rotating it signs everyone out |
 | `CT_PUBLIC_BASE_URL`, `CT_ALLOWED_HOSTS`, `CT_TRUSTED_PROXY_HOPS` | Public URL, host allow-list, load-balancer hops for client IPs |
-| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `CT_API_AUDIENCE` | Institution SSO; bearer tokens for API clients |
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `CT_API_AUDIENCE` | School SSO; bearer tokens for API clients. Optional if class codes are on |
+| `CT_LOCAL_ACCOUNTS` | Class codes, usernames and staff invitations (default on). At least one of SSO or this must be enabled |
+| `CT_CLAIM_ROLE`, `CT_CLAIM_AGE_BAND`, `CT_CLAIM_ADULT`, `CT_CLAIM_BIRTHDATE`, `CT_CLAIM_GUARDIAN`, `CT_CLAIM_REGION`, `CT_CLAIM_COHORTS`, `CT_CLAIM_INSTITUTION` | Rename the IdP claims above |
 | `CT_KEY_PROVIDER` | `aws-kms` (required outside development) or `local` |
 | `CT_CONSENT_POLICY_VERSION` | Changing it asks every learner to consent again |
 | `CT_RATE_*_PER_MIN` | Per-user, per-IP, sign-in and credential limits |
