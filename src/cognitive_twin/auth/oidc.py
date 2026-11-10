@@ -23,7 +23,8 @@ from jwt import PyJWKClient
 
 from ..config import Settings
 
-ROLES = ("learner", "educator", "admin")
+ROLES = ("learner", "educator", "school_admin", "admin")
+BANDS = ("under13", "13to17", "adult")
 
 
 class OIDCError(RuntimeError):
@@ -37,26 +38,35 @@ class Identity:
     email: str | None
     name: str
     role: str
-    adult_verified: bool
+    age_band: str  # under13 | 13to17 | adult | unknown, from institution records
+    guardian_ok: bool
     region: str
     institution: str | None
     cohorts: list[str]
 
 
-def adult_from_claims(claims: dict, settings: Settings, today: date | None = None) -> bool:
-    """Adulthood comes only from institution records: a verified flag or a birthdate."""
+def age_band_from_claims(claims: dict, settings: Settings, today: date | None = None) -> str:
+    """Age group comes only from institution records: a band, a verified-adult flag or a
+    birthdate. The birthdate itself is never stored."""
+    band = claims.get(settings.claim_age_band)
+    if band in BANDS:
+        return band
     if claims.get(settings.claim_adult) is True:
-        return True
+        return "adult"
     bd = claims.get(settings.claim_birthdate)
     if isinstance(bd, str):
         try:
             born = date.fromisoformat(bd[:10])
         except ValueError:
-            return False
+            return "unknown"
         t = today or date.today()
         age = t.year - born.year - ((t.month, t.day) < (born.month, born.day))
-        return age >= settings.min_age
-    return False
+        return "adult" if age >= 18 else "13to17" if age >= 13 else "under13"
+    return "unknown"
+
+
+def adult_from_claims(claims: dict, settings: Settings, today: date | None = None) -> bool:
+    return age_band_from_claims(claims, settings, today) == "adult"
 
 
 def identity_from_claims(claims: dict, settings: Settings) -> Identity:
@@ -72,8 +82,13 @@ def identity_from_claims(claims: dict, settings: Settings) -> Identity:
         cohorts = [c.strip() for c in cohorts.split(",") if c.strip()]
     name = (claims.get("name") or claims.get("given_name") or claims.get("email")
             or "Learner")[:120]
-    return Identity(issuer=claims["iss"], subject=str(claims["sub"]), email=claims.get("email"),
-                    name=name, role=role, adult_verified=adult_from_claims(claims, settings),
+    band = age_band_from_claims(claims, settings)
+    guardian = claims.get(settings.claim_guardian) is True and band != "adult"
+    email = claims.get("email")
+    if band == "under13":  # data minimisation for young children: first name, no e-mail
+        name, email = name.split()[0][:40], None
+    return Identity(issuer=claims["iss"], subject=str(claims["sub"]), email=email,
+                    name=name, role=role, age_band=band, guardian_ok=guardian,
                     region=region, institution=claims.get(settings.claim_institution),
                     cohorts=[str(c)[:120] for c in cohorts][:50])
 

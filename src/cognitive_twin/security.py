@@ -27,7 +27,8 @@ CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';
 LIMITER_THREADS = anyio.CapacityLimiter(8)
 
 # credential-guessing and IdP-abuse surface; /auth/session and /auth/config are not
-SIGN_IN_PATHS = frozenset({"/auth/login", "/auth/callback", "/auth/dev-login"})
+SIGN_IN_PATHS = frozenset({"/auth/login", "/auth/callback", "/auth/dev-login",
+                           "/auth/local-login", "/auth/join", "/auth/invite"})
 
 
 def client_ip(request: Request, trusted_hops: int) -> str:

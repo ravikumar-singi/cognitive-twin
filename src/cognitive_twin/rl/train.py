@@ -10,7 +10,7 @@ from ..consent import ConsentProfile
 from ..edge.sensor import EdgeProcessor, NeuralBand
 from ..env.simulator import SimulatedLearner
 from ..ledger.ledger import Ledger
-from ..skills import Track, load_track
+from ..skills import DEFAULT_TRACK, Track, load_track
 from ..twin import CognitiveTwin
 from .teacher import (
     EpisodeResult,
@@ -99,8 +99,8 @@ def credential_precision(teacher: MultiAgentTeacher, learners: int = 200, steps:
 
 
 def benchmark_all(episodes: int = 800, learners: int = 200, steps: int = 80,
-                  seed: int = 7) -> dict:
-    track = load_track()
+                  seed: int = 7, track_id: str = DEFAULT_TRACK) -> dict:
+    track = load_track(track_id)
     teacher, curve = train(episodes, steps, seed, track=track)
     rng = np.random.default_rng(seed + 2)
     untrained = MultiAgentTeacher(track, np.random.default_rng(seed + 3), name="untrained RL")

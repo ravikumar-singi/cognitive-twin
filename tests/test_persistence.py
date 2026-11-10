@@ -123,9 +123,12 @@ def test_policy_versions_are_recorded_and_revertible(client):
     from importlib import resources
     h = login(client, "admin")
     pols = client.get("/api/admin/policies", headers=h).json()
-    original = next(p["version"] for p in pols if p["active"])
-    blob = json.loads(resources.files("cognitive_twin").joinpath("content/policy.json")
-                      .read_text())
+    assert {p["track"] for p in pols if p["active"]} == {
+        "ml-foundations", "middle-school-maths", "high-school-algebra", "python-basics",
+        "general-science"}  # every subject is ready to teach on first start
+    original = next(p["version"] for p in pols if p["active"] and p["track"] == "ml-foundations")
+    blob = json.loads(resources.files("cognitive_twin")
+                      .joinpath("content/policies/ml-foundations.json").read_text())
     blob["pacing_q"]["f0-a1"] = [0.0, 9.9]  # a deliberately different policy
     new = client.post("/api/admin/policies", json=blob, headers=h).json()["version"]
     assert new != original

@@ -1,0 +1,69 @@
+{
+  "learning_curve": [
+    {
+      "episodes": "0-10",
+      "mean_knowledge": 3.902
+    },
+    {
+      "episodes": "10-25",
+      "mean_knowledge": 4.268
+    },
+    {
+      "episodes": "25-50",
+      "mean_knowledge": 4.196
+    },
+    {
+      "episodes": "50-100",
+      "mean_knowledge": 4.153
+    },
+    {
+      "episodes": "100-200",
+      "mean_knowledge": 4.33
+    },
+    {
+      "episodes": "200-400",
+      "mean_knowledge": 4.198
+    },
+    {
+      "episodes": "400-800",
+      "mean_knowledge": 4.233
+    }
+  ],
+  "benchmarks": [
+    {
+      "teacher": "multi-agent RL",
+      "mean_knowledge": 4.227,
+      "mean_mastered": 2.31,
+      "mean_breaks": 13.05,
+      "mean_accuracy": 0.542
+    },
+    {
+      "teacher": "untrained RL",
+      "mean_knowledge": 1.959,
+      "mean_mastered": 0.0,
+      "mean_breaks": 3.9,
+      "mean_accuracy": 0.71
+    },
+    {
+      "teacher": "fixed syllabus",
+      "mean_knowledge": 3.103,
+      "mean_mastered": 0.36,
+      "mean_breaks": 5.0,
+      "mean_accuracy": 0.533
+    },
+    {
+      "teacher": "random",
+      "mean_knowledge": 1.579,
+      "mean_mastered": 0.0,
+      "mean_breaks": 0.0,
+      "mean_accuracy": 0.41
+    }
+  ],
+  "credential_precision": {
+    "credentials": 429,
+    "per_learner": 2.15,
+    "mean_true_knowledge": 0.825,
+    "share_true_at_least_0.8": 0.685,
+    "share_true_at_least_0.7": 0.914
+  }
+}

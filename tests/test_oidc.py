@@ -119,3 +119,21 @@ def test_adulthood_rules():
     assert adult_from_claims({"birthdate": "2008-11-09"}, s, today=date(2026, 11, 9))
     assert not adult_from_claims({"birthdate": "2008-11-10"}, s, today=date(2026, 11, 9))
     assert not adult_from_claims({}, s)
+
+
+def test_age_groups_and_guardian_consent_come_from_school_claims(sso):
+    from cognitive_twin.auth.oidc import age_band_from_claims
+    s = Settings()
+    t = date(2026, 11, 9)
+    assert age_band_from_claims({"birthdate": "2016-01-01"}, s, t) == "under13"
+    assert age_band_from_claims({"birthdate": "2013-11-09"}, s, t) == "13to17"
+    assert age_band_from_claims({"ct_age_band": "13to17"}, s, t) == "13to17"
+    assert age_band_from_claims({"ct_age_band": "toddler"}, s, t) == "unknown"
+    c, idp = sso
+    _sign_in(c, idp, {"name": "Kiran Patel", "email": "kiran@school.example",
+                      "ct_age_band": "under13", "ct_guardian_consent": True,
+                      "ct_region": "IN", "ct_institution": "Lake School"})
+    me = c.get("/api/me").json()
+    assert me["consent"]["not_eligible_reason"] is None
+    assert me["user"]["name"] == "Kiran" and me["user"]["institution"] == "Lake School"
+    assert c.get("/api/me/export").json()["profile"]["email"] is None  # never stored

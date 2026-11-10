@@ -54,7 +54,7 @@ An over-confident belief is the worst failure mode here: the agents move on too 
 ## Reproducing
 
 ```bash
-cognitive-twin train --episodes 800 --learners 200 --steps 80 --json docs/benchmark.json
+cognitive-twin train --episodes 800 --learners 200 --steps 80 --track ml-foundations --out src/cognitive_twin/content/policies/ml-foundations.json --json docs/benchmarks/ml-foundations.json
 ```
 
 Evaluation uses common random numbers: every teacher meets the same held-out learners in the same order, so differences come from the policy rather than from luck.

@@ -32,6 +32,8 @@ class Intervention:
 @dataclass
 class Guardian:
     log: list[Intervention] = field(default_factory=list)
+    # Longest run of questions before a break is required; lower for younger learners.
+    max_steps: int = MAX_STEPS_WITHOUT_BREAK
 
     def _note(self, twin: CognitiveTwin, agent: str, rule: str, detail: str) -> None:
         self.log.append(Intervention(twin.step, agent, rule, detail))
@@ -63,7 +65,7 @@ class Guardian:
         if proposed == "break" and twin.steps_since_break < MIN_STEPS_BEFORE_BREAK:
             self._note(twin, "pacing", "min-work", "break too soon; continuing")
             return "continue"
-        if proposed == "continue" and twin.steps_since_break >= MAX_STEPS_WITHOUT_BREAK:
+        if proposed == "continue" and twin.steps_since_break >= self.max_steps:
             self._note(twin, "pacing", "max-session",
                        f"{twin.steps_since_break} steps without a break; forcing a break")
             return "break"

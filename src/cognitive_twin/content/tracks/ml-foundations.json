@@ -1,0 +1,652 @@
+{
+ "id": "ml-foundations",
+ "name": "Machine Learning Foundations",
+ "audience": "Ages 16 and up",
+ "description": "Vectors, derivatives, loss functions, gradient descent, linear regression and overfitting.",
+ "skills": [
+  {
+   "id": "vectors",
+   "name": "Vectors and operations",
+   "prereqs": [],
+   "rubric": "Adds, scales and measures vectors correctly"
+  },
+  {
+   "id": "dot-product",
+   "name": "Dot product and similarity",
+   "prereqs": [
+    "vectors"
+   ],
+   "rubric": "Computes and interprets dot products and cosine similarity"
+  },
+  {
+   "id": "derivatives",
+   "name": "Derivatives",
+   "prereqs": [],
+   "rubric": "Differentiates polynomials and applies the chain rule"
+  },
+  {
+   "id": "loss-functions",
+   "name": "Loss functions",
+   "prereqs": [
+    "vectors"
+   ],
+   "rubric": "Chooses and computes MSE and cross-entropy"
+  },
+  {
+   "id": "gradient-descent",
+   "name": "Gradient descent",
+   "prereqs": [
+    "derivatives",
+    "loss-functions"
+   ],
+   "rubric": "Performs and reasons about gradient updates and learning rates"
+  },
+  {
+   "id": "linear-regression",
+   "name": "Linear regression",
+   "prereqs": [
+    "dot-product",
+    "gradient-descent"
+   ],
+   "rubric": "Fits and interprets a linear model"
+  },
+  {
+   "id": "overfitting",
+   "name": "Overfitting and regularisation",
+   "prereqs": [
+    "linear-regression"
+   ],
+   "rubric": "Diagnoses overfitting and applies regularisation"
+  }
+ ],
+ "items": [
+  {
+   "id": "vec-1",
+   "skill": "vectors",
+   "difficulty": 1,
+   "prompt": "What is [1, 2] + [3, 4]?",
+   "options": [
+    "[4, 6]",
+    "[3, 8]",
+    "[2, 2]",
+    "10"
+   ],
+   "answer": 0,
+   "hint": "Add component by component."
+  },
+  {
+   "id": "vec-2",
+   "skill": "vectors",
+   "difficulty": 1,
+   "prompt": "What is 3 x [2, -1]?",
+   "options": [
+    "[5, 2]",
+    "[6, -3]",
+    "[6, 3]",
+    "[-6, 3]"
+   ],
+   "answer": 1,
+   "hint": "Multiply every component by the scalar."
+  },
+  {
+   "id": "vec-3",
+   "skill": "vectors",
+   "difficulty": 2,
+   "prompt": "What is the length (L2 norm) of [3, 4]?",
+   "options": [
+    "7",
+    "12",
+    "5",
+    "25"
+   ],
+   "answer": 2,
+   "hint": "Square, sum, then take the square root."
+  },
+  {
+   "id": "vec-4",
+   "skill": "vectors",
+   "difficulty": 2,
+   "prompt": "Which vector is a unit vector?",
+   "options": [
+    "[1, 1]",
+    "[0.6, 0.8]",
+    "[2, 0]",
+    "[0.5, 0.5]"
+   ],
+   "answer": 1,
+   "hint": "Its norm must equal 1."
+  },
+  {
+   "id": "vec-5",
+   "skill": "vectors",
+   "difficulty": 3,
+   "prompt": "Normalising [0, 5, 0] gives:",
+   "options": [
+    "[0, 1, 0]",
+    "[0, 5, 0]",
+    "[0, 0.2, 0]",
+    "[1, 1, 1]"
+   ],
+   "answer": 0,
+   "hint": "Divide by the norm."
+  },
+  {
+   "id": "vec-6",
+   "skill": "vectors",
+   "difficulty": 3,
+   "prompt": "If |a| = 2, what is |-3a|?",
+   "options": [
+    "-6",
+    "6",
+    "2",
+    "5"
+   ],
+   "answer": 1,
+   "hint": "Scaling by c scales the norm by |c|."
+  },
+  {
+   "id": "dot-1",
+   "skill": "dot-product",
+   "difficulty": 1,
+   "prompt": "[1, 2] . [3, 4] = ?",
+   "options": [
+    "10",
+    "11",
+    "[3, 8]",
+    "24"
+   ],
+   "answer": 1,
+   "hint": "Multiply pairwise, then add."
+  },
+  {
+   "id": "dot-2",
+   "skill": "dot-product",
+   "difficulty": 1,
+   "prompt": "[1, 0] . [0, 1] = ?",
+   "options": [
+    "1",
+    "0",
+    "-1",
+    "2"
+   ],
+   "answer": 1,
+   "hint": "These vectors are perpendicular."
+  },
+  {
+   "id": "dot-3",
+   "skill": "dot-product",
+   "difficulty": 2,
+   "prompt": "A dot product of zero means the vectors are:",
+   "options": [
+    "Parallel",
+    "Equal",
+    "Orthogonal",
+    "Unit length"
+   ],
+   "answer": 2,
+   "hint": "Think about the angle between them."
+  },
+  {
+   "id": "dot-4",
+   "skill": "dot-product",
+   "difficulty": 2,
+   "prompt": "Cosine similarity of [1, 1] and [2, 2] is:",
+   "options": [
+    "0",
+    "0.5",
+    "1",
+    "2"
+   ],
+   "answer": 2,
+   "hint": "They point the same way."
+  },
+  {
+   "id": "dot-5",
+   "skill": "dot-product",
+   "difficulty": 3,
+   "prompt": "Cosine similarity of [1, 0] and [-1, 0] is:",
+   "options": [
+    "1",
+    "0",
+    "-1",
+    "Undefined"
+   ],
+   "answer": 2,
+   "hint": "Opposite directions."
+  },
+  {
+   "id": "dot-6",
+   "skill": "dot-product",
+   "difficulty": 3,
+   "prompt": "For unit vectors a and b, a . b equals:",
+   "options": [
+    "The angle",
+    "cos of the angle",
+    "sin of the angle",
+    "1 always"
+   ],
+   "answer": 1,
+   "hint": "a . b = |a||b|cos(theta)."
+  },
+  {
+   "id": "der-1",
+   "skill": "derivatives",
+   "difficulty": 1,
+   "prompt": "d/dx of x^2 is:",
+   "options": [
+    "x",
+    "2x",
+    "x^3/3",
+    "2"
+   ],
+   "answer": 1,
+   "hint": "Power rule: n x^(n-1)."
+  },
+  {
+   "id": "der-2",
+   "skill": "derivatives",
+   "difficulty": 1,
+   "prompt": "d/dx of 7 is:",
+   "options": [
+    "7",
+    "1",
+    "0",
+    "x"
+   ],
+   "answer": 2,
+   "hint": "Constants don't change."
+  },
+  {
+   "id": "der-3",
+   "skill": "derivatives",
+   "difficulty": 2,
+   "prompt": "d/dx of 3x^3 - 2x is:",
+   "options": [
+    "9x^2 - 2",
+    "3x^2 - 2",
+    "9x^2",
+    "x^3 - x"
+   ],
+   "answer": 0,
+   "hint": "Differentiate term by term."
+  },
+  {
+   "id": "der-4",
+   "skill": "derivatives",
+   "difficulty": 2,
+   "prompt": "At a minimum of a smooth function, the derivative is:",
+   "options": [
+    "Positive",
+    "Negative",
+    "Zero",
+    "Infinite"
+   ],
+   "answer": 2,
+   "hint": "The slope is flat there."
+  },
+  {
+   "id": "der-5",
+   "skill": "derivatives",
+   "difficulty": 3,
+   "prompt": "d/dx of (2x + 1)^2 is:",
+   "options": [
+    "2(2x + 1)",
+    "4(2x + 1)",
+    "(2x + 1)",
+    "4x"
+   ],
+   "answer": 1,
+   "hint": "Chain rule: outer times inner."
+  },
+  {
+   "id": "der-6",
+   "skill": "derivatives",
+   "difficulty": 3,
+   "prompt": "d/dx of e^(3x) is:",
+   "options": [
+    "e^(3x)",
+    "3e^(3x)",
+    "3x e^(3x)",
+    "e^3"
+   ],
+   "answer": 1,
+   "hint": "Chain rule again."
+  },
+  {
+   "id": "loss-1",
+   "skill": "loss-functions",
+   "difficulty": 1,
+   "prompt": "A loss function measures:",
+   "options": [
+    "Model size",
+    "Prediction error",
+    "Training time",
+    "Data volume"
+   ],
+   "answer": 1,
+   "hint": "It scores how wrong the model is."
+  },
+  {
+   "id": "loss-2",
+   "skill": "loss-functions",
+   "difficulty": 1,
+   "prompt": "Squared error of prediction 3 vs target 5 is:",
+   "options": [
+    "2",
+    "4",
+    "-2",
+    "8"
+   ],
+   "answer": 1,
+   "hint": "(prediction - target)^2."
+  },
+  {
+   "id": "loss-3",
+   "skill": "loss-functions",
+   "difficulty": 2,
+   "prompt": "MSE of errors [1, -1, 2] is:",
+   "options": [
+    "2/3",
+    "2",
+    "6",
+    "4/3"
+   ],
+   "answer": 1,
+   "hint": "Mean of squared errors: (1+1+4)/3."
+  },
+  {
+   "id": "loss-4",
+   "skill": "loss-functions",
+   "difficulty": 2,
+   "prompt": "Which loss suits binary classification?",
+   "options": [
+    "MSE",
+    "Cross-entropy",
+    "L1 norm of weights",
+    "Accuracy"
+   ],
+   "answer": 1,
+   "hint": "It compares predicted probabilities to labels."
+  },
+  {
+   "id": "loss-5",
+   "skill": "loss-functions",
+   "difficulty": 3,
+   "prompt": "Cross-entropy for true class prob p = 1 is:",
+   "options": [
+    "1",
+    "0",
+    "Infinite",
+    "0.5"
+   ],
+   "answer": 1,
+   "hint": "-log(1)."
+  },
+  {
+   "id": "loss-6",
+   "skill": "loss-functions",
+   "difficulty": 3,
+   "prompt": "MSE penalises large errors more than MAE because:",
+   "options": [
+    "It is linear",
+    "It squares errors",
+    "It ignores outliers",
+    "It uses logs"
+   ],
+   "answer": 1,
+   "hint": "Look at the exponent."
+  },
+  {
+   "id": "gd-1",
+   "skill": "gradient-descent",
+   "difficulty": 1,
+   "prompt": "Gradient descent moves parameters:",
+   "options": [
+    "Along the gradient",
+    "Against the gradient",
+    "Randomly",
+    "Toward zero"
+   ],
+   "answer": 1,
+   "hint": "We want the loss to go down."
+  },
+  {
+   "id": "gd-2",
+   "skill": "gradient-descent",
+   "difficulty": 1,
+   "prompt": "The learning rate controls:",
+   "options": [
+    "Step size",
+    "Model depth",
+    "Dataset size",
+    "Loss type"
+   ],
+   "answer": 0,
+   "hint": "How far each update moves."
+  },
+  {
+   "id": "gd-3",
+   "skill": "gradient-descent",
+   "difficulty": 2,
+   "prompt": "w = 2, gradient = 4, lr = 0.1. New w?",
+   "options": [
+    "2.4",
+    "1.6",
+    "1.9",
+    "6"
+   ],
+   "answer": 1,
+   "hint": "w - lr x gradient."
+  },
+  {
+   "id": "gd-4",
+   "skill": "gradient-descent",
+   "difficulty": 2,
+   "prompt": "A learning rate that is too large tends to:",
+   "options": [
+    "Converge slowly",
+    "Diverge or oscillate",
+    "Always overfit",
+    "Freeze weights"
+   ],
+   "answer": 1,
+   "hint": "Steps overshoot the minimum."
+  },
+  {
+   "id": "gd-5",
+   "skill": "gradient-descent",
+   "difficulty": 3,
+   "prompt": "Minimise f(w) = w^2 from w = 1, lr = 0.5. After one step w = ?",
+   "options": [
+    "0",
+    "0.5",
+    "1",
+    "-1"
+   ],
+   "answer": 0,
+   "hint": "f'(w) = 2w."
+  },
+  {
+   "id": "gd-6",
+   "skill": "gradient-descent",
+   "difficulty": 3,
+   "prompt": "Stochastic gradient descent estimates the gradient from:",
+   "options": [
+    "All data",
+    "A mini-batch",
+    "The test set",
+    "The labels only"
+   ],
+   "answer": 1,
+   "hint": "It trades accuracy for speed."
+  },
+  {
+   "id": "lr-1",
+   "skill": "linear-regression",
+   "difficulty": 1,
+   "prompt": "Linear regression predicts:",
+   "options": [
+    "A class label",
+    "A continuous value",
+    "A cluster",
+    "A probability only"
+   ],
+   "answer": 1,
+   "hint": "Regression vs classification."
+  },
+  {
+   "id": "lr-2",
+   "skill": "linear-regression",
+   "difficulty": 1,
+   "prompt": "In y = wx + b, b is the:",
+   "options": [
+    "Slope",
+    "Intercept",
+    "Loss",
+    "Feature"
+   ],
+   "answer": 1,
+   "hint": "Value of y when x = 0."
+  },
+  {
+   "id": "lr-3",
+   "skill": "linear-regression",
+   "difficulty": 2,
+   "prompt": "w = [2, 1], x = [3, 4], b = 1. Prediction?",
+   "options": [
+    "10",
+    "11",
+    "12",
+    "8"
+   ],
+   "answer": 1,
+   "hint": "w . x + b."
+  },
+  {
+   "id": "lr-4",
+   "skill": "linear-regression",
+   "difficulty": 2,
+   "prompt": "Linear regression is usually trained by minimising:",
+   "options": [
+    "Cross-entropy",
+    "MSE",
+    "Accuracy",
+    "Hinge loss"
+   ],
+   "answer": 1,
+   "hint": "Squared errors."
+  },
+  {
+   "id": "lr-5",
+   "skill": "linear-regression",
+   "difficulty": 3,
+   "prompt": "Weight of +3 on feature x means a one-unit rise in x changes y by:",
+   "options": [
+    "-3",
+    "+3",
+    "3x",
+    "Nothing"
+   ],
+   "answer": 1,
+   "hint": "Holding other features fixed."
+  },
+  {
+   "id": "lr-6",
+   "skill": "linear-regression",
+   "difficulty": 3,
+   "prompt": "MSE gradient wrt w for one example (x, y) is:",
+   "options": [
+    "2(wx + b - y)x",
+    "(wx - y)",
+    "2x",
+    "y - wx"
+   ],
+   "answer": 0,
+   "hint": "Chain rule on (wx + b - y)^2."
+  },
+  {
+   "id": "of-1",
+   "skill": "overfitting",
+   "difficulty": 1,
+   "prompt": "Overfitting means a model:",
+   "options": [
+    "Fits training data too closely",
+    "Is too simple",
+    "Has no bias",
+    "Trains too slowly"
+   ],
+   "answer": 0,
+   "hint": "Great on train, poor on new data."
+  },
+  {
+   "id": "of-2",
+   "skill": "overfitting",
+   "difficulty": 1,
+   "prompt": "Which set detects overfitting?",
+   "options": [
+    "Training set",
+    "Validation set",
+    "Label set",
+    "Feature set"
+   ],
+   "answer": 1,
+   "hint": "Data the model hasn't trained on."
+  },
+  {
+   "id": "of-3",
+   "skill": "overfitting",
+   "difficulty": 2,
+   "prompt": "L2 regularisation adds a penalty on:",
+   "options": [
+    "Squared weights",
+    "Absolute errors",
+    "Learning rate",
+    "Batch size"
+   ],
+   "answer": 0,
+   "hint": "Ridge regression."
+  },
+  {
+   "id": "of-4",
+   "skill": "overfitting",
+   "difficulty": 2,
+   "prompt": "Train loss falls while validation loss rises. This suggests:",
+   "options": [
+    "Underfitting",
+    "Overfitting",
+    "Perfect fit",
+    "A data leak fix"
+   ],
+   "answer": 1,
+   "hint": "The gap is widening."
+  },
+  {
+   "id": "of-5",
+   "skill": "overfitting",
+   "difficulty": 3,
+   "prompt": "L1 regularisation tends to produce:",
+   "options": [
+    "Dense weights",
+    "Sparse weights",
+    "Larger weights",
+    "No change"
+   ],
+   "answer": 1,
+   "hint": "Lasso zeroes some weights."
+  },
+  {
+   "id": "of-6",
+   "skill": "overfitting",
+   "difficulty": 3,
+   "prompt": "Early stopping halts training when:",
+   "options": [
+    "Train loss is zero",
+    "Validation loss stops improving",
+    "Epoch 1 ends",
+    "Weights are zero"
+   ],
+   "answer": 1,
+   "hint": "Watch the held-out curve."
+  }
+ ]
+}

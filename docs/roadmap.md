@@ -8,7 +8,7 @@
 - Validator DAO, Ed25519-signed verifiable credentials, hash-chained ledger
 - FastAPI service, dashboard, CLI, 24 tests, CI
 
-## v0.2: phase one, production pilot (this release)
+## v0.2: phase one, production pilot
 - PostgreSQL persistence with append-only ledger, consent and audit tables; stateless multi-instance service
 - KMS-held validator keys with versioning, rotation and revocation
 - Institution SSO (OIDC), learner/educator/administrator roles, cohort scoping, CSRF, rate limits
@@ -16,11 +16,18 @@
 - Versioned teaching policies with rollback; JSON logs, Prometheus metrics, tracing, alerts
 - Terraform for staging and production, CI security scans, staged deploys, load test, runbooks
 
-## v0.3: realism
-- Fit simulator parameters to public interaction logs (ASSISTments, EdNet)
-- Off-policy evaluation (inverse propensity scoring, doubly robust) on logged data
+## v0.3: schools, all ages, five subjects (this release)
+- Middle-school maths, high-school algebra, general science and Python basics alongside ML foundations, each with a trained policy
+- Schools as tenants; school administrators; class codes, usernames and staff invitations for schools without SSO
+- Age groups and guardian consent from school records; under-13 data minimisation; age-based break limits
+- Teacher tools: approvals, adding students, password resets, data export and deletion on request
+
+## v0.3.x: content and realism
+- Teacher review of every question; larger question banks (at least 20 per skill) with item-response-theory difficulty calibration
+- Per-subject credential thresholds to bring credential precision back above 80%
+- Fit simulator parameters to public interaction logs (ASSISTments, EdNet); off-policy evaluation on logged data
 - Deep knowledge tracing as an alternative belief model
-- Second content track; item-response-theory difficulty calibration
+- Printable class sign-in cards; retention schedules per school
 
 ## v0.4: learning agents at scale
 - Centralised training with decentralised execution for the agent team

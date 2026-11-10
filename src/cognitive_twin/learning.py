@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 from .config import Settings
 from .consent import ConsentProfile
 from .db.models import Attempt as AttemptRow
-from .db.models import AuditEvent, ConsentRecord, GuardianIntervention, Twin, User, utcnow
+from .db.models import AuditEvent, ConsentRecord, GuardianIntervention, School, Twin, User, utcnow
 from .db.models import Decision as DecisionRow
 from .edge.sensor import NEUTRAL
 from .explain import explain, skill_statuses
@@ -39,6 +39,25 @@ ANSWERS = Counter("ct_answers_total", "Answers submitted", ["correct"])
 # Live human sessions space break prompts out and respect "keep going".
 HUMAN_MIN_QUESTIONS_BETWEEN_BREAKS = 8
 DECLINED_BREAK_COOLDOWN = 6
+
+# Age bands come from school records. Younger learners get shorter stretches between
+# breaks: (questions before a break may be suggested, questions before one is required).
+BANDS = ("under13", "13to17", "adult")
+BREAK_RULES = {"under13": (5, 12), "13to17": (6, 18), "adult": (8, 25)}
+MINOR_POLICY_TEXT = (
+    "How Cognitive Twin uses your information.\n\n"
+    "Your school has set this up for you, and a parent or guardian has agreed with the "
+    "school that you can use it.\n\n"
+    "We keep your first name, your answers and which skills you are learning, so the tutors "
+    "can pick the right questions for you and your teacher can see how you are doing. We "
+    "never show you adverts and we never sell or share your information.\n\n"
+    "You, your parent or guardian, or your teacher can ask to see or delete your "
+    "information at any time. Just ask your teacher."
+)
+
+
+def band_rank(band: str) -> int:
+    return BANDS.index(band) if band in BANDS else -1
 
 LEARNING_POLICY_TEXT = (
     "Cognitive Twin pilot: learning data consent.\n\n"
@@ -111,13 +130,18 @@ class LearningService:
                                      ConsentRecord.scope == scope)
                               .order_by(ConsentRecord.id.desc()).limit(1))
 
+    def policy_text(self, user: User) -> str:
+        return LEARNING_POLICY_TEXT if user.age_band == "adult" else MINOR_POLICY_TEXT
+
     def consent_status(self, user: User) -> dict:
         learning = self.latest_consent(user.id, "learning")
         neural = self.latest_consent(user.id, "neural_sensing")
         current = self.settings.consent_policy_version
         return {
             "policy_version": current,
-            "policy_text": LEARNING_POLICY_TEXT,
+            "age_band": user.age_band,
+            "not_eligible_reason": self.not_eligible_reason(user),
+            "policy_text": self.policy_text(user),
             "neural_policy_text": NEURAL_POLICY_TEXT,
             "learning_granted": bool(learning and learning.granted
                                      and learning.policy_version == current),
@@ -128,16 +152,36 @@ class LearningService:
             "eligible": self.eligible(user),
         }
 
+    def not_eligible_reason(self, user: User) -> str | None:
+        """Why this learner can't start yet, in words a learner can act on. None = OK.
+
+        Everything here comes from school records: the age band, the guardian's consent
+        for under-18s, and the youngest age group the school has chosen to enrol.
+        """
+        if user.age_band not in BANDS:
+            return "Your teacher still needs to approve your account."
+        school = self.db.get(School, user.school_id) if user.school_id else None
+        youngest = school.youngest_band if school else "adult"
+        if band_rank(user.age_band) < band_rank(youngest):
+            return "Your school hasn't opened Cognitive Twin to your age group."
+        if user.age_band != "adult" and not user.guardian_ok:
+            return ("Your school needs to confirm that a parent or guardian has agreed. "
+                    "Please ask your teacher.")
+        return None
+
     def eligible(self, user: User) -> bool:
-        return bool(user.adult_verified)
+        return self.not_eligible_reason(user) is None
 
     def record_consent(self, ctx: Ctx, user: User, learning: bool, neural_sensing: bool) -> dict:
-        if not self.eligible(user):
-            raise NotEligible("the pilot is open to verified adult learners only")
+        reason = self.not_eligible_reason(user)
+        if reason:
+            raise NotEligible(reason)
+        if user.age_band != "adult":
+            neural_sensing = False  # never recorded for children
         v = self.settings.consent_policy_version
         self.db.add(ConsentRecord(user_id=user.id, scope="learning", granted=learning,
                                   policy_version=v,
-                                  policy_text_sha256=policy_sha(LEARNING_POLICY_TEXT),
+                                  policy_text_sha256=policy_sha(self.policy_text(user)),
                                   source="learner"))
         self.db.add(ConsentRecord(user_id=user.id, scope="neural_sensing",
                                   granted=neural_sensing, policy_version=v,
@@ -157,14 +201,16 @@ class LearningService:
 
     def profile(self, user: User) -> ConsentProfile:
         neural = self.latest_consent(user.id, "neural_sensing")
-        return ConsentProfile(age=self.settings.min_age if user.adult_verified else 0,
+        age = {"adult": 18, "13to17": 15, "under13": 10}.get(user.age_band, 0)
+        return ConsentProfile(age=age, guardian_consent=user.guardian_ok,
                               region=user.region,
                               neural_opt_in=bool(neural and neural.granted)
                               and self.settings.neural_enabled)
 
     def require_learning(self, user: User) -> None:
-        if not self.eligible(user):
-            raise NotEligible("the pilot is open to verified adult learners only")
+        reason = self.not_eligible_reason(user)
+        if reason:
+            raise NotEligible(reason)
         c = self.latest_consent(user.id, "learning")  # one query on the hot path
         if not (c and c.granted and c.policy_version == self.settings.consent_policy_version):
             raise ConsentRequired("learning consent for the current policy is required")
@@ -172,13 +218,14 @@ class LearningService:
     # --- twin load/save ----------------------------------------------------------------------
 
     def _twin_row(self, user: User, lock: bool) -> Twin:
-        q = select(Twin).where(Twin.user_id == user.id)
+        q = select(Twin).where(Twin.user_id == user.id, Twin.track_id == self.track.id)
         if lock:
             q = q.with_for_update()
         row = self.db.scalar(q)
         if row is None:
             seed = CognitiveTwin(user.id, self.track)
-            row = Twin(user_id=user.id, p_known=dict(seed.p_known), attention=0.5, load=0.5,
+            row = Twin(user_id=user.id, track_id=self.track.id, p_known=dict(seed.p_known),
+                       attention=0.5, load=0.5,
                        steps_since_break=0, step=0, break_declined_at=-100, agent_state={},
                        pending=None)
             self.db.add(row)
@@ -191,7 +238,9 @@ class LearningService:
                              if k in self.track.skills})
         twin.attention, twin.load = row.attention, row.load
         twin.steps_since_break, twin.step = row.steps_since_break, row.step
-        attempts = self.db.scalars(select(AttemptRow).where(AttemptRow.user_id == user.id)
+        attempts = self.db.scalars(select(AttemptRow)
+                                   .where(AttemptRow.user_id == user.id,
+                                          AttemptRow.track_id == self.track.id)
                                    .order_by(AttemptRow.id)).all()
         twin.attempts = [Attempt(a.item_id, a.skill, a.difficulty, a.modality, a.correct, a.step)
                          for a in attempts]
@@ -211,29 +260,32 @@ class LearningService:
         twin = self._domain(user, row)
         if row.pending and not skip_break:
             return self._present(row.pending)  # idempotent: same question on reload
-        policy = self.policies.current(self.db)
+        policy = self.policies.current(self.db, self.track.id)
         cur, tutor, pacing = policy.agents(self.track, row.agent_state or {})
-        guardian = Guardian()
+        quiet_for, max_steps = BREAK_RULES.get(user.age_band, BREAK_RULES["adult"])
+        guardian = Guardian(max_steps=max_steps)
         teacher = MultiAgentTeacher(self.track, np.random.default_rng(), cur, tutor, pacing,
                                     guardian)
         profile = self.profile(user)
         twin.observe_state(NEUTRAL)  # headband disabled in phase one (R4.3)
         if skip_break:
             row.break_declined_at = twin.step
-        quiet = (twin.steps_since_break < HUMAN_MIN_QUESTIONS_BETWEEN_BREAKS
+        required = twin.steps_since_break >= max_steps  # the safety limit always wins
+        quiet = (twin.steps_since_break < quiet_for
                  or twin.step - row.break_declined_at < DECLINED_BREAK_COOLDOWN)
         d = teacher.act(twin, profile.neural_sensing_allowed, explore=False,
-                        force_continue=skip_break or quiet)
+                        force_continue=(skip_break or quiet) and not required)
         d.explanation = explain(d, twin)
         row.agent_state = {"curriculum_current": cur.current, "curriculum_steps": cur._steps}
-        dec = DecisionRow(user_id=user.id, step=twin.step, action=d.action,
+        dec = DecisionRow(user_id=user.id, track_id=self.track.id, step=twin.step, action=d.action,
                           proposed_action=d.proposed_action or d.action, skill=d.skill,
                           difficulty=d.difficulty, modality=d.modality,
                           item_id=d.item.id if d.item else None, policy_version=policy.version,
                           explanation=d.explanation)
         self.db.add(dec)
         for i in guardian.log:
-            self.db.add(GuardianIntervention(user_id=user.id, step=i.step, agent=i.agent,
+            self.db.add(GuardianIntervention(user_id=user.id, track_id=self.track.id,
+                                             step=i.step, agent=i.agent,
                                              rule=i.rule, detail=i.detail,
                                              policy_version=policy.version))
             GUARDIAN_INTERVENTIONS.labels(i.agent, i.rule).inc()
@@ -273,7 +325,8 @@ class LearningService:
         item = self.track.items[item_id]
         correct = choice == item.answer
         delta = twin.observe_answer(item.id, p["skill"], p["difficulty"], p["modality"], correct)
-        self.db.add(AttemptRow(user_id=user.id, item_id=item.id, skill=p["skill"],
+        self.db.add(AttemptRow(user_id=user.id, track_id=self.track.id, item_id=item.id,
+                               skill=p["skill"],
                                difficulty=p["difficulty"], modality=p["modality"],
                                correct=correct, step=twin.step,
                                policy_version=p["policy_version"]))
@@ -318,13 +371,17 @@ class LearningService:
     def view(self, user: User) -> dict:
         row = self._twin_row(user, lock=False)
         twin = self._domain(user, row)
-        creds = self.ledger.credentials_for(user.subject_did)
+        tid = self.track.id
+        creds = [c for c in self.ledger.credentials_for(user.subject_did)
+                 if c["credentialSubject"]["skill"] in self.track.skills]
         active = {c["credentialSubject"]["skill"] for c in creds if c["status"] == "active"}
         skills = skill_statuses(twin, active)
-        decisions = self.db.scalars(select(DecisionRow).where(DecisionRow.user_id == user.id)
+        decisions = self.db.scalars(select(DecisionRow)
+                                    .where(DecisionRow.user_id == user.id,
+                                           DecisionRow.track_id == tid)
                                     .order_by(DecisionRow.id.desc()).limit(30)).all()
         results = {a.step: a for a in self.db.scalars(
-            select(AttemptRow).where(AttemptRow.user_id == user.id)
+            select(AttemptRow).where(AttemptRow.user_id == user.id, AttemptRow.track_id == tid)
             .order_by(AttemptRow.id.desc()).limit(30))}
         log = []
         for dcs in decisions:
@@ -336,11 +393,14 @@ class LearningService:
                 entry["correct"] = a.correct
             log.append(entry)
         interventions = self.db.scalars(
-            select(GuardianIntervention).where(GuardianIntervention.user_id == user.id)
+            select(GuardianIntervention).where(GuardianIntervention.user_id == user.id,
+                                               GuardianIntervention.track_id == tid)
             .order_by(GuardianIntervention.id.desc()).limit(20)).all()
         return {
             "user": {"id": user.id, "name": user.display_name, "role": user.role,
-                     "region": user.region, "institution": user.institution},
+                     "region": user.region, "institution": user.institution,
+                     "age_band": user.age_band},
+            "track_id": tid,
             "consent": self.consent_status(user),
             "sensing_active": False,
             "twin": twin.snapshot(),
@@ -360,7 +420,7 @@ class LearningService:
     # --- data rights (R4.5) ---------------------------------------------------------------------
 
     def export(self, ctx: Ctx, user: User) -> dict:
-        row = self.db.scalar(select(Twin).where(Twin.user_id == user.id))
+        rows = self.db.scalars(select(Twin).where(Twin.user_id == user.id)).all()
         attempts = self.db.scalars(select(AttemptRow).where(AttemptRow.user_id == user.id)
                                    .order_by(AttemptRow.id)).all()
         decisions = self.db.scalars(select(DecisionRow).where(DecisionRow.user_id == user.id)
@@ -372,14 +432,15 @@ class LearningService:
             "exported_at": utcnow().isoformat(),
             "profile": {"id": user.id, "display_name": user.display_name, "email": user.email,
                         "role": user.role, "institution": user.institution,
-                        "region": user.region, "adult_verified": user.adult_verified,
+                        "region": user.region, "age_band": user.age_band,
+                        "guardian_consent_confirmed_by_school": user.guardian_ok,
                         "pseudonymous_id": user.subject_did,
                         "created_at": user.created_at.isoformat()},
             "consent_history": self.consent_history(user.id),
-            "twin": None if row is None else {
-                "p_known": row.p_known, "step": row.step,
-                "steps_since_break": row.steps_since_break},
-            "attempts": [{"item_id": a.item_id, "skill": a.skill, "difficulty": a.difficulty,
+            "subjects": [{"subject": row.track_id, "skill_estimates": row.p_known,
+                          "questions_answered": row.step} for row in rows],
+            "attempts": [{"subject": a.track_id, "item_id": a.item_id, "skill": a.skill,
+                          "difficulty": a.difficulty,
                           "modality": a.modality, "correct": a.correct, "step": a.step,
                           "policy_version": a.policy_version,
                           "at": a.created_at.isoformat()} for a in attempts],

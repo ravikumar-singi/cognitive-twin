@@ -1,0 +1,556 @@
+{
+ "id": "middle-school-maths",
+ "name": "Middle-school maths",
+ "audience": "Ages 11 to 14",
+ "description": "Fractions, percentages, ratios, negative numbers, equations and shapes.",
+ "skills": [
+  {
+   "id": "msm-fractions",
+   "name": "Fractions",
+   "prereqs": [],
+   "rubric": "Adds, subtracts, multiplies, divides and compares fractions"
+  },
+  {
+   "id": "msm-percentages",
+   "name": "Decimals and percentages",
+   "prereqs": [
+    "msm-fractions"
+   ],
+   "rubric": "Converts between fractions, decimals and percentages and finds percentage changes"
+  },
+  {
+   "id": "msm-ratios",
+   "name": "Ratio and proportion",
+   "prereqs": [
+    "msm-fractions"
+   ],
+   "rubric": "Simplifies ratios, shares in a ratio and scales quantities"
+  },
+  {
+   "id": "msm-negatives",
+   "name": "Negative numbers",
+   "prereqs": [],
+   "rubric": "Adds, subtracts and multiplies with negative numbers"
+  },
+  {
+   "id": "msm-equations",
+   "name": "Solving equations",
+   "prereqs": [
+    "msm-negatives"
+   ],
+   "rubric": "Solves one-step, two-step and bracketed linear equations"
+  },
+  {
+   "id": "msm-shapes",
+   "name": "Area, perimeter and angles",
+   "prereqs": [],
+   "rubric": "Finds perimeters, areas and missing angles and uses Pythagoras' theorem"
+  }
+ ],
+ "items": [
+  {
+   "id": "msm-fractions-1",
+   "skill": "msm-fractions",
+   "difficulty": 1,
+   "prompt": "What is 1/2 + 1/4?",
+   "options": [
+    "3/4",
+    "2/6",
+    "1/6",
+    "1/8"
+   ],
+   "answer": 0,
+   "hint": "Rewrite 1/2 as 2/4 first."
+  },
+  {
+   "id": "msm-fractions-2",
+   "skill": "msm-fractions",
+   "difficulty": 1,
+   "prompt": "Which fraction is equal to 2/4?",
+   "options": [
+    "1/4",
+    "1/2",
+    "2/3",
+    "4/2"
+   ],
+   "answer": 1,
+   "hint": "Divide the top and bottom by the same number."
+  },
+  {
+   "id": "msm-fractions-3",
+   "skill": "msm-fractions",
+   "difficulty": 2,
+   "prompt": "What is 2/3 x 3/4?",
+   "options": [
+    "5/7",
+    "8/9",
+    "1/2",
+    "5/12"
+   ],
+   "answer": 2,
+   "hint": "Multiply the tops and the bottoms, then simplify."
+  },
+  {
+   "id": "msm-fractions-4",
+   "skill": "msm-fractions",
+   "difficulty": 2,
+   "prompt": "What is 3/4 - 1/3?",
+   "options": [
+    "2/1",
+    "5/12",
+    "1/6",
+    "2/7"
+   ],
+   "answer": 1,
+   "hint": "Use 12 as the common denominator."
+  },
+  {
+   "id": "msm-fractions-5",
+   "skill": "msm-fractions",
+   "difficulty": 3,
+   "prompt": "What is 3/4 ÷ 3/8?",
+   "options": [
+    "9/32",
+    "1/2",
+    "2",
+    "6"
+   ],
+   "answer": 2,
+   "hint": "Flip the second fraction and multiply."
+  },
+  {
+   "id": "msm-fractions-6",
+   "skill": "msm-fractions",
+   "difficulty": 3,
+   "prompt": "Which is the largest: 3/5, 5/8, 7/12 or 2/3?",
+   "options": [
+    "3/5",
+    "5/8",
+    "7/12",
+    "2/3"
+   ],
+   "answer": 3,
+   "hint": "Turn each one into a decimal to compare."
+  },
+  {
+   "id": "msm-percentages-1",
+   "skill": "msm-percentages",
+   "difficulty": 1,
+   "prompt": "What is 50% of 80?",
+   "options": [
+    "40",
+    "30",
+    "50",
+    "160"
+   ],
+   "answer": 0,
+   "hint": "50% means half."
+  },
+  {
+   "id": "msm-percentages-2",
+   "skill": "msm-percentages",
+   "difficulty": 1,
+   "prompt": "Write 0.25 as a percentage.",
+   "options": [
+    "2.5%",
+    "25%",
+    "0.25%",
+    "250%"
+   ],
+   "answer": 1,
+   "hint": "Multiply by 100."
+  },
+  {
+   "id": "msm-percentages-3",
+   "skill": "msm-percentages",
+   "difficulty": 2,
+   "prompt": "What is 15% of 200?",
+   "options": [
+    "15",
+    "20",
+    "30",
+    "35"
+   ],
+   "answer": 2,
+   "hint": "Find 10% and 5%, then add them."
+  },
+  {
+   "id": "msm-percentages-4",
+   "skill": "msm-percentages",
+   "difficulty": 2,
+   "prompt": "Write 3/5 as a decimal.",
+   "options": [
+    "0.6",
+    "0.35",
+    "0.53",
+    "1.67"
+   ],
+   "answer": 0,
+   "hint": "Divide 3 by 5."
+  },
+  {
+   "id": "msm-percentages-5",
+   "skill": "msm-percentages",
+   "difficulty": 3,
+   "prompt": "A shirt costs 400 and is 25% off. What is the sale price?",
+   "options": [
+    "100",
+    "375",
+    "325",
+    "300"
+   ],
+   "answer": 3,
+   "hint": "Find 25% of 400 and subtract it."
+  },
+  {
+   "id": "msm-percentages-6",
+   "skill": "msm-percentages",
+   "difficulty": 3,
+   "prompt": "A price rises from 50 to 60. What is the percentage increase?",
+   "options": [
+    "10%",
+    "20%",
+    "16.7%",
+    "120%"
+   ],
+   "answer": 1,
+   "hint": "Divide the change by the original price."
+  },
+  {
+   "id": "msm-ratios-1",
+   "skill": "msm-ratios",
+   "difficulty": 1,
+   "prompt": "Simplify the ratio 6:9.",
+   "options": [
+    "2:3",
+    "3:2",
+    "1:3",
+    "6:9 is already simplest"
+   ],
+   "answer": 0,
+   "hint": "Divide both parts by 3."
+  },
+  {
+   "id": "msm-ratios-2",
+   "skill": "msm-ratios",
+   "difficulty": 1,
+   "prompt": "There are 2 red beads and 3 blue beads. What is the ratio of red to blue?",
+   "options": [
+    "3:2",
+    "2:5",
+    "2:3",
+    "3:5"
+   ],
+   "answer": 2,
+   "hint": "Keep the order: red first, then blue."
+  },
+  {
+   "id": "msm-ratios-3",
+   "skill": "msm-ratios",
+   "difficulty": 2,
+   "prompt": "Share 40 in the ratio 3:5. What is the smaller share?",
+   "options": [
+    "15",
+    "25",
+    "8",
+    "24"
+   ],
+   "answer": 0,
+   "hint": "There are 8 parts in total, so one part is 5."
+  },
+  {
+   "id": "msm-ratios-4",
+   "skill": "msm-ratios",
+   "difficulty": 2,
+   "prompt": "If 3 pens cost 45, how much do 5 pens cost?",
+   "options": [
+    "60",
+    "75",
+    "90",
+    "135"
+   ],
+   "answer": 1,
+   "hint": "Find the cost of one pen first."
+  },
+  {
+   "id": "msm-ratios-5",
+   "skill": "msm-ratios",
+   "difficulty": 3,
+   "prompt": "A map has a scale of 1:50,000. How far in real life is 4 cm on the map?",
+   "options": [
+    "200 m",
+    "20 km",
+    "2 km",
+    "5 km"
+   ],
+   "answer": 2,
+   "hint": "4 x 50,000 cm = 200,000 cm. Convert to kilometres."
+  },
+  {
+   "id": "msm-ratios-6",
+   "skill": "msm-ratios",
+   "difficulty": 3,
+   "prompt": "A recipe for 4 people uses 300 g of flour. How much flour is needed for 10 people?",
+   "options": [
+    "600 g",
+    "700 g",
+    "1200 g",
+    "750 g"
+   ],
+   "answer": 3,
+   "hint": "Find the amount for one person first."
+  },
+  {
+   "id": "msm-negatives-1",
+   "skill": "msm-negatives",
+   "difficulty": 1,
+   "prompt": "What is -3 + 5?",
+   "options": [
+    "-8",
+    "2",
+    "8",
+    "-2"
+   ],
+   "answer": 1,
+   "hint": "Start at -3 on a number line and move 5 to the right."
+  },
+  {
+   "id": "msm-negatives-2",
+   "skill": "msm-negatives",
+   "difficulty": 1,
+   "prompt": "Which number is the smallest?",
+   "options": [
+    "-7",
+    "-2",
+    "0",
+    "3"
+   ],
+   "answer": 0,
+   "hint": "Further left on the number line means smaller."
+  },
+  {
+   "id": "msm-negatives-3",
+   "skill": "msm-negatives",
+   "difficulty": 2,
+   "prompt": "What is -4 - 6?",
+   "options": [
+    "2",
+    "-2",
+    "10",
+    "-10"
+   ],
+   "answer": 3,
+   "hint": "Start at -4 and move 6 further left."
+  },
+  {
+   "id": "msm-negatives-4",
+   "skill": "msm-negatives",
+   "difficulty": 2,
+   "prompt": "What is -3 x 4?",
+   "options": [
+    "12",
+    "-7",
+    "-12",
+    "1"
+   ],
+   "answer": 2,
+   "hint": "A negative times a positive is negative."
+  },
+  {
+   "id": "msm-negatives-5",
+   "skill": "msm-negatives",
+   "difficulty": 3,
+   "prompt": "What is -6 x -5?",
+   "options": [
+    "30",
+    "-30",
+    "-11",
+    "11"
+   ],
+   "answer": 0,
+   "hint": "A negative times a negative is positive."
+  },
+  {
+   "id": "msm-negatives-6",
+   "skill": "msm-negatives",
+   "difficulty": 3,
+   "prompt": "What is 8 - (-3) + (-5)?",
+   "options": [
+    "0",
+    "6",
+    "10",
+    "16"
+   ],
+   "answer": 1,
+   "hint": "Subtracting a negative is the same as adding."
+  },
+  {
+   "id": "msm-equations-1",
+   "skill": "msm-equations",
+   "difficulty": 1,
+   "prompt": "Solve x + 7 = 12.",
+   "options": [
+    "19",
+    "7",
+    "5",
+    "84"
+   ],
+   "answer": 2,
+   "hint": "Subtract 7 from both sides."
+  },
+  {
+   "id": "msm-equations-2",
+   "skill": "msm-equations",
+   "difficulty": 1,
+   "prompt": "Solve 3x = 18.",
+   "options": [
+    "6",
+    "15",
+    "21",
+    "54"
+   ],
+   "answer": 0,
+   "hint": "Divide both sides by 3."
+  },
+  {
+   "id": "msm-equations-3",
+   "skill": "msm-equations",
+   "difficulty": 2,
+   "prompt": "Solve 2x + 3 = 11.",
+   "options": [
+    "7",
+    "4",
+    "5.5",
+    "8"
+   ],
+   "answer": 1,
+   "hint": "Subtract 3 first, then divide by 2."
+  },
+  {
+   "id": "msm-equations-4",
+   "skill": "msm-equations",
+   "difficulty": 2,
+   "prompt": "Solve x/4 - 1 = 2.",
+   "options": [
+    "4",
+    "8",
+    "12",
+    "3"
+   ],
+   "answer": 2,
+   "hint": "Add 1 first, then multiply by 4."
+  },
+  {
+   "id": "msm-equations-5",
+   "skill": "msm-equations",
+   "difficulty": 3,
+   "prompt": "Solve 5x - 4 = 2x + 11.",
+   "options": [
+    "3",
+    "7",
+    "15",
+    "5"
+   ],
+   "answer": 3,
+   "hint": "Collect the x terms on one side first."
+  },
+  {
+   "id": "msm-equations-6",
+   "skill": "msm-equations",
+   "difficulty": 3,
+   "prompt": "Solve 3(x - 2) = 12.",
+   "options": [
+    "6",
+    "2",
+    "10",
+    "18"
+   ],
+   "answer": 0,
+   "hint": "Divide both sides by 3, or expand the bracket first."
+  },
+  {
+   "id": "msm-shapes-1",
+   "skill": "msm-shapes",
+   "difficulty": 1,
+   "prompt": "What is the perimeter of a rectangle 5 cm by 3 cm?",
+   "options": [
+    "15 cm",
+    "8 cm",
+    "16 cm",
+    "30 cm"
+   ],
+   "answer": 2,
+   "hint": "Add up all four sides."
+  },
+  {
+   "id": "msm-shapes-2",
+   "skill": "msm-shapes",
+   "difficulty": 1,
+   "prompt": "What is the area of a rectangle 6 cm by 4 cm?",
+   "options": [
+    "10 cm²",
+    "24 cm²",
+    "20 cm²",
+    "48 cm²"
+   ],
+   "answer": 1,
+   "hint": "Area of a rectangle is length x width."
+  },
+  {
+   "id": "msm-shapes-3",
+   "skill": "msm-shapes",
+   "difficulty": 2,
+   "prompt": "What is the area of a triangle with base 10 cm and height 6 cm?",
+   "options": [
+    "60 cm²",
+    "16 cm²",
+    "30 cm²",
+    "36 cm²"
+   ],
+   "answer": 2,
+   "hint": "Half of base x height."
+  },
+  {
+   "id": "msm-shapes-4",
+   "skill": "msm-shapes",
+   "difficulty": 2,
+   "prompt": "Two angles of a triangle are 50° and 60°. What is the third angle?",
+   "options": [
+    "70°",
+    "80°",
+    "110°",
+    "250°"
+   ],
+   "answer": 0,
+   "hint": "Angles in a triangle add up to 180°."
+  },
+  {
+   "id": "msm-shapes-5",
+   "skill": "msm-shapes",
+   "difficulty": 3,
+   "prompt": "What is the area of a circle with radius 3 cm? Use π = 3.14.",
+   "options": [
+    "18.84 cm²",
+    "9.42 cm²",
+    "113.04 cm²",
+    "28.26 cm²"
+   ],
+   "answer": 3,
+   "hint": "Area is π x radius x radius."
+  },
+  {
+   "id": "msm-shapes-6",
+   "skill": "msm-shapes",
+   "difficulty": 3,
+   "prompt": "A right-angled triangle has shorter sides of 6 cm and 8 cm. How long is the longest side?",
+   "options": [
+    "14 cm",
+    "10 cm",
+    "48 cm",
+    "100 cm"
+   ],
+   "answer": 1,
+   "hint": "Use Pythagoras: 6² + 8² = c²."
+  }
+ ]
+}

@@ -3,7 +3,11 @@
   cognitive-twin serve                       start the API and web app
   cognitive-twin migrate                     apply database migrations
   cognitive-twin db create-app-role          least-privilege role for the service
+  cognitive-twin school create NAME [--region IN] [--youngest under13|13to17|adult]
+                                             add a school; prints its admin invite code
+  cognitive-twin school list | invite SCHOOL_ID [--role educator|school_admin]
   cognitive-twin policy import FILE          store a policy version (and activate it)
+  cognitive-twin policy import-bundled       activate the shipped policy for new subjects
   cognitive-twin policy list | activate VER  list versions / roll forward or back
   cognitive-twin validators add ID NAME STAKE
   cognitive-twin keys rotate VALIDATOR [--kms-key-arn ARN]
@@ -60,10 +64,18 @@ def cmd_db(a: argparse.Namespace) -> None:
 
 def cmd_policy(a: argparse.Namespace) -> None:
     from .db.session import transaction
-    from .policy_store import activate_policy, import_policy_file, list_policies
+    from .policy_store import (
+        activate_policy,
+        import_bundled_policies,
+        import_policy_file,
+        list_policies,
+    )
     _, sessions = _db()
     with transaction(sessions) as db:
-        if a.action == "import":
+        if a.action == "import-bundled":
+            done = import_bundled_policies(db, actor_id="cli")
+            print("activated bundled policies for: " + (", ".join(done) or "nothing new"))
+        elif a.action == "import":
             v = import_policy_file(db, a.target, actor_id="cli", notes=a.notes)
             print(f"imported and activated policy {v}")
         elif a.action == "activate":
@@ -71,7 +83,39 @@ def cmd_policy(a: argparse.Namespace) -> None:
             print(f"activated policy {a.target}")
         else:
             for p in list_policies(db):
-                print(f"{'*' if p['active'] else ' '} {p['version']}  {p['notes']}")
+                print(f"{'*' if p['active'] else ' '} {p['track']:<22} {p['version']}  "
+                      f"{p['notes']}")
+
+
+def cmd_school(a: argparse.Namespace) -> None:
+    from sqlalchemy import select
+
+    from .db.models import AuditEvent, School
+    from .db.session import transaction
+    from .schools import AccountError, create_invite, create_school
+    _, sessions = _db()
+    with transaction(sessions) as db:
+        try:
+            if a.action == "create":
+                school = create_school(db, a.target, a.region, a.youngest)
+                code = create_invite(db, school, "school_admin", "cli")
+                db.add(AuditEvent(action="school.create", target=school.id, outcome="ok",
+                                  details={"name": school.name, "via": "cli"}))
+                print(f"created {school.name} ({school.id})\n"
+                      f"school administrator invitation code (valid 14 days): {code}\n"
+                      "They open the app, choose 'I have an invitation code', and set a "
+                      "password.")
+            elif a.action == "invite":
+                school = db.get(School, a.target)
+                if school is None:
+                    sys.exit(f"no school with id {a.target}")
+                print(create_invite(db, school, a.role, "cli"))
+            else:
+                for sc in db.scalars(select(School).order_by(School.name)).all():
+                    print(f"{sc.id}  {sc.name:<40} {sc.sign_in:<6} {sc.region:<4} "
+                          f"youngest: {sc.youngest_band}")
+        except AccountError as e:
+            sys.exit(str(e))
 
 
 def cmd_validators(a: argparse.Namespace) -> None:
@@ -120,7 +164,8 @@ def cmd_ledger(a: argparse.Namespace) -> None:
 
 def cmd_train(a: argparse.Namespace) -> None:
     from .rl.train import benchmark_all
-    r = benchmark_all(episodes=a.episodes, learners=a.learners, steps=a.steps, seed=a.seed)
+    r = benchmark_all(episodes=a.episodes, learners=a.learners, steps=a.steps, seed=a.seed,
+                      track_id=a.track)
     r["teacher"].save(a.out)
     print(f"policy saved to {a.out} (import it with `cognitive-twin policy import {a.out}`)")
     curve = r["learning_curve"]
@@ -149,8 +194,8 @@ def cmd_demo(a: argparse.Namespace) -> None:
     from .rl.teacher import MultiAgentTeacher, run_episode
     from .skills import load_track
     from .twin import CognitiveTwin
-    track = load_track()
-    path = resources.files("cognitive_twin").joinpath("content/policy.json")
+    track = load_track(a.track)
+    path = resources.files("cognitive_twin").joinpath(f"content/policies/{track.id}.json")
     teacher = MultiAgentTeacher.load(str(path), track, seed=a.seed)
     rng = np.random.default_rng(a.seed)
     learner = SimulatedLearner.sample(track, rng)
@@ -186,10 +231,19 @@ def main() -> None:
     dbp.set_defaults(fn=cmd_db)
 
     p = sub.add_parser("policy", help="manage teaching policy versions")
-    p.add_argument("action", choices=["import", "list", "activate"])
+    p.add_argument("action", choices=["import", "import-bundled", "list", "activate"])
     p.add_argument("target", nargs="?", default="")
     p.add_argument("--notes", default="")
     p.set_defaults(fn=cmd_policy)
+
+    sc = sub.add_parser("school", help="manage schools")
+    sc.add_argument("action", choices=["create", "list", "invite"])
+    sc.add_argument("target", nargs="?", default="", help="school name (create) or id (invite)")
+    sc.add_argument("--region", default="IN")
+    sc.add_argument("--youngest", default="adult", choices=["under13", "13to17", "adult"],
+                    help="youngest age group the school enrols")
+    sc.add_argument("--role", default="educator", choices=["educator", "school_admin"])
+    sc.set_defaults(fn=cmd_school)
 
     v = sub.add_parser("validators", help="register validators")
     v.add_argument("action", choices=["add"])
@@ -213,6 +267,7 @@ def main() -> None:
     t.add_argument("--learners", type=int, default=200)
     t.add_argument("--steps", type=int, default=80)
     t.add_argument("--seed", type=int, default=7)
+    t.add_argument("--track", default="ml-foundations", help="subject id to train for")
     t.add_argument("--out", default="policy.json")
     t.add_argument("--json", help="also write benchmark results to this file")
     t.set_defaults(fn=cmd_train)
@@ -220,6 +275,7 @@ def main() -> None:
     d = sub.add_parser("demo", help="teach one simulated learner in the terminal")
     d.add_argument("--steps", type=int, default=60)
     d.add_argument("--seed", type=int, default=3)
+    d.add_argument("--track", default="ml-foundations", help="subject id")
     d.set_defaults(fn=cmd_demo)
 
     args = ap.parse_args()
